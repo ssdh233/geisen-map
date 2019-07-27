@@ -27,7 +27,7 @@ export default class Crawler {
 
   getPaginatedUrls: (url: string) => string[] | Promise<string[]>;
   getList: (html: any) => any[];
-  getItem: (item: any) => RawGameCenter | Promise<RawGameCenter>;
+  getItem: (item: any) => RawGameCenter | Promise<RawGameCenter> | null;
 
   constructor({
     sourceId,
@@ -52,6 +52,7 @@ export default class Crawler {
   }
 
   async crawlOnePage(url: string): Promise<RawGameCenter[]> {
+    console.log("crawling ", url);
     const addAdditionInfo = (item: RawInfo) => ({ ...item, url, sourceId: this.sourceId, updateTime: this.updateTime });
     const htmlBuffer = await fetch(url).then(res => res.arrayBuffer());
     const htmlUnit8Array = new Uint8Array(htmlBuffer);
@@ -64,7 +65,7 @@ export default class Crawler {
     const { document } = new jsdom.JSDOM(htmlText).window;
 
     const items = await Promise.all(this.getList(document).map(this.getItem));
-    return items.map(gameCenterItem => ({
+    return items.filter(x => x).map(gameCenterItem => ({
       ...gameCenterItem,
       infos: gameCenterItem.infos.map(addAdditionInfo),
       games: gameCenterItem.games.map(gameItem => ({
@@ -75,6 +76,7 @@ export default class Crawler {
   }
 
   async start() {
+    const that = this;
     const paginatedUrls = await Promise.all(this.urls.map(this.getPaginatedUrls));
     this.urls = [].concat(...paginatedUrls);
     const promises = this.urls.map(async url => await this.crawlOnePage(url));
@@ -85,14 +87,14 @@ export default class Crawler {
     mongoose.connect("mongodb://localhost/geisenmap", { useNewUrlParser: true });
     const db = mongoose.connection;
     db.on("error", console.error.bind(console, "connection error:"));
-    db.once("open", function() {
+    db.once("open", async function() {
       // TODO clear this part
       const GameCenter = mongoose.model<RawGameCenter & mongoose.Document>("gameCenter", gameCenterSchema);
 
       // TODO remove all information from that source if there are results (how to check?)
 
-      let count = 0;
-      flatResults.forEach(async gameCenterItem => {
+      for (let i = 0; i < flatResults.length; i++) {
+        const gameCenterItem = flatResults[i];
         let gameCenterEntity = await GameCenter.findOne({ id: gameCenterItem.id });
         if (!gameCenterEntity) {
           gameCenterEntity = new GameCenter({
@@ -103,12 +105,19 @@ export default class Crawler {
           });
         }
 
-        gameCenterEntity.infos = gameCenterEntity.infos.concat(gameCenterItem.infos);
+        // TODO try to move this part to schema?
+        // clear previous info from this source
+        gameCenterEntity.infos = gameCenterEntity.infos.filter(info => info.sourceId !== that.sourceId);
+        // add new info
+        gameCenterEntity.infos = [...gameCenterEntity.infos, ...gameCenterItem.infos];
         gameCenterItem.games.forEach(gameItem => {
           let currentGame;
           let index = gameCenterEntity.games.findIndex(x => x.name === gameItem.name);
           if (index >= 0) {
             const currentGameInfos = gameCenterEntity.games[index].infos;
+            gameCenterEntity.games[index].infos = gameCenterEntity.games[index].infos.filter(
+              info => info.sourceId !== that.sourceId
+            );
             gameCenterEntity.games[index].infos = [...currentGameInfos, ...gameItem.infos];
           } else {
             currentGame = { name: gameItem.name, infos: gameItem.infos };
@@ -117,11 +126,9 @@ export default class Crawler {
         });
 
         await gameCenterEntity.save();
-        console.log(`Saved ${++count} Items`);
-        if (count >= flatResults.length) {
-          db.close();
-        }
-      });
+        console.log(`Saved ${i} Items`);
+      }
+      db.close();
     });
   }
 }

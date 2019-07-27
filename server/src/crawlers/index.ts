@@ -7,7 +7,7 @@ require("dotenv").config();
 
 const taikoCrawler = new Crawler({
   sourceId: "taiko_official",
-  urls: Array(1)
+  urls: Array(47) // max 47
     .fill(0)
     .map((_, i) => {
       let id = "" + (i + 1);
@@ -40,7 +40,7 @@ const taikoCrawler = new Crawler({
 
 const popnCrawler = new Crawler({
   sourceId: "popn_official",
-  urls: Array(1)
+  urls: Array(47) // max 47
     .fill(0)
     .map(
       (_, i) => `https://p.eagate.573.jp/game/popn/peace/p/tenpo/list.html?pref=${i + 1}&search_word=&pcb_type=2&page=0`
@@ -57,69 +57,85 @@ const popnCrawler = new Crawler({
     return Array.from(document.querySelectorAll("div.Rcont_info > div > div.tenpo_data"));
   },
   getItem: async raw => {
-    const name = raw.children[0].textContent;
-    const address = raw.children[1].children[1].textContent;
-    const access = raw.children[3].children[1].textContent;
-    const businessHour = raw.children[5].children[1].textContent;
-    const closedDay = raw.children[7].children[1].textContent;
-    const tel = raw.children[9].children[1].textContent;
+    try {
+      const name = raw.children[0].textContent;
+      const address = raw.children[1].children[1].textContent;
+      const access = raw.children[3].children[1].textContent;
+      const businessHour = raw.children[5].children[1].textContent;
+      const closedDay = raw.children[7].children[1].textContent;
+      const tel = raw.children[9].children[1].textContent;
 
-    let cabType = "";
-    if (raw.children[11].children[0].children[0] && raw.children[11].children[0].children[0].className === "wide") {
-      cabType += `新筐体 ${raw.children[11].children[0].children[0].textContent} `;
-    }
-    if (raw.children[11].children[1].children[0] && raw.children[11].children[1].children[0].className === "standard") {
-      cabType += `旧筐体 ${raw.children[11].children[1].children[0].textContent} `;
-    }
+      let cabType = "";
+      if (raw.children[11].children[0].children[0] && raw.children[11].children[0].children[0].className === "wide") {
+        cabType += `新筐体 ${raw.children[11].children[0].children[0].textContent} `;
+      }
+      if (
+        raw.children[11].children[1].children[0] &&
+        raw.children[11].children[1].children[0].className === "standard"
+      ) {
+        cabType += `旧筐体 ${raw.children[11].children[1].children[0].textContent} `;
+      }
 
-    const popnCardImageSrc =
-      (raw.children[11].children[2].children[0] && raw.children[11].children[2].children[0].src) || "";
-    const popnCard = popnCardImageSrc.includes("card_ok.gif")
-      ? "ポップンカードあり"
-      : popnCardImageSrc.includes("card_ng.gif")
-      ? "ポップンカード準備中..."
-      : "";
+      const popnCardImageSrc =
+        (raw.children[11].children[2].children[0] && raw.children[11].children[2].children[0].src) || "";
+      const popnCard = popnCardImageSrc.includes("card_ok.gif")
+        ? "ポップンカードあり"
+        : popnCardImageSrc.includes("card_ng.gif")
+        ? "ポップンカード準備中..."
+        : "";
 
-    const paseriImageSrc = raw.children[11].children[3].children[0].src || "";
-    const paseri = paseriImageSrc.includes("paseli.jpg") ? "パセリ利用可" : "";
+      const paseriImageSrc =
+        (raw.children[11].children[3].children[0] && raw.children[11].children[3].children[0].src) || "";
+      const paseri = paseriImageSrc.includes("paseli.jpg") ? "パセリ利用可" : "";
 
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${
-      process.env.GOOGLE_MAP_API_KEY
-    }`;
-    const geocodingApiRes = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${
+      const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${
         process.env.GOOGLE_MAP_API_KEY
-      }`
-    ).then(res => res.json());
+      }`;
 
-    const geo = geocodingApiRes.results[0].geometry.location;
+      const geocodingApiRes = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${
+          process.env.GOOGLE_MAP_API_KEY
+        }`
+      ).then(res => res.json());
+      console.log(
+        "calling google map api: ",
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${
+          process.env.GOOGLE_MAP_API_KEY
+        }`
+      );
 
-    const id = geo.lat.toFixed(4) + "," + geo.lng.toFixed(4);
+      const geo = geocodingApiRes.results[0] && geocodingApiRes.results[0].geometry.location;
 
-    const result = {
-      id,
-      geo,
-      infos: [
-        name && { infoType: "name", text: name },
-        address && { infoType: "address", text: address },
-        access && { infoType: "access", text: access },
-        businessHour && { infoType: "businessHour", text: businessHour },
-        closedDay && { infoType: "closedDay", text: closedDay },
-        tel && { infoType: "tel", text: tel }
-      ].filter(x => x),
-      games: [
-        {
-          name: "popn",
-          infos: [
-            cabType && { infoType: "cabType", text: cabType },
-            popnCard && { infoType: "popnCard", text: popnCard },
-            paseri && { infoType: "paseri", text: paseri }
-          ].filter(x => x)
-        }
-      ]
-    };
+      const id = geo.lat.toFixed(4) + "," + geo.lng.toFixed(4);
 
-    return result;
+      const result = {
+        id,
+        geo,
+        infos: [
+          name && { infoType: "name", text: name },
+          address && { infoType: "address", text: address },
+          access && { infoType: "access", text: access },
+          businessHour && { infoType: "businessHour", text: businessHour },
+          closedDay && { infoType: "closedDay", text: closedDay },
+          tel && { infoType: "tel", text: tel }
+        ].filter(x => x),
+        games: [
+          {
+            name: "popn",
+            infos: [
+              cabType && { infoType: "cabType", text: cabType },
+              popnCard && { infoType: "popnCard", text: popnCard },
+              paseri && { infoType: "paseri", text: paseri }
+            ].filter(x => x)
+          }
+        ]
+      };
+
+      return result;
+    } catch (error) {
+      console.error(raw.outerHTML, error);
+      return null;
+    }
   }
 });
 
