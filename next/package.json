@@ -5,6 +5,7 @@
   "author": "matsumatsu233 <songsongdahu233@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "isomorphic-unfetch": "^3.0.0",
     "leaflet": "^1.5.1",
     "next": "^9.0.2",
     "react": "^16.8.6",
@@ -17,10 +18,10 @@
     "start": "next start"
   },
   "devDependencies": {
-    "@types/react-leaflet": "^2.2.1",
     "@types/node": "^12.6.8",
     "@types/react": "^16.8.23",
     "@types/react-dom": "^16.8.5",
+    "@types/react-leaflet": "^2.2.1",
     "typescript": "^3.5.3"
   }
 }
