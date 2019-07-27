@@ -10,7 +10,7 @@ const Info = {
 
 const gameCenterSchema = new mongoose.Schema({
   id: String,
-  geo: { lat: Number, long: Number },
+  geo: { lat: Number, lng: Number },
   infos: [Info],
   games: [{
     name: String, // Enum?

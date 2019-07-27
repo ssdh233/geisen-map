@@ -24,6 +24,13 @@
   dependencies:
     "@types/node" "*"
 
+"@types/encoding-japanese@^1.0.15":
+  version "1.0.15"
+  resolved "https://registry.yarnpkg.com/@types/encoding-japanese/-/encoding-japanese-1.0.15.tgz#5df7c9c6965255a8aa10a7435eba75384fd0df09"
+  integrity sha1-XffJxpZSVaiqEKdDXrp1OE/Q3wk=
+  dependencies:
+    "@types/node" "*"
+
 "@types/express-serve-static-core@*":
   version "4.16.7"
   resolved "https://registry.yarnpkg.com/@types/express-serve-static-core/-/express-serve-static-core-4.16.7.tgz#50ba6f8a691c08a3dd9fa7fba25ef3133d298049"
@@ -699,6 +706,11 @@ dot-prop@^4.1.0:
   dependencies:
     is-obj "^1.0.0"
 
+dotenv@^8.0.0:
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-8.0.0.tgz#ed310c165b4e8a97bb745b0a9d99c31bda566440"
+  integrity sha512-30xVGqjLjiUOArT4+M5q9sYdvuR4riM6yK9wMcas9Vbp6zZa+ocC9dp6QoftuhTPhFAiLK/0C5Ni2nou/Bk8lg==
+
 duplexer3@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/duplexer3/-/duplexer3-0.1.4.tgz#ee01dd1cac0ed3cbc7fdbea37dc0a8f1ce002ce2"
@@ -721,6 +733,11 @@ encodeurl@~1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/encodeurl/-/encodeurl-1.0.2.tgz#ad3ff4c86ec2d029322f5a02c3a9a606c95b3f59"
   integrity sha1-rT/0yG7C0CkyL1oCw6mmBslbP1k=
+
+encoding-japanese@^1.0.29:
+  version "1.0.29"
+  resolved "https://registry.yarnpkg.com/encoding-japanese/-/encoding-japanese-1.0.29.tgz#f66db17f2afaadf9a38b6b0227c0c877d2f2c5b1"
+  integrity sha1-9m2xfyr6rfmji2sCJ8DId9LyxbE=
 
 escape-html@~1.0.3:
   version "1.0.3"

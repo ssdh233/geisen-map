@@ -1,20 +1,21 @@
 import fetch from "node-fetch";
-import jsdom from "jsdom";
 import mongoose from "mongoose";
+import Encoding from "encoding-japanese";
+import jsdom from "jsdom";
 
 import gameCenterSchema from "../schemas/gameCenter";
 
 interface RawInfo {
   infoType: string; // TODO enum
   text: string;
-  sourceId: String;
-  url: String;
-  updateTime: Date;
+  sourceId?: String;
+  url?: String;
+  updateTime?: Date;
 }
 
 interface RawGameCenter {
   id: string;
-  geo: { lat: string; long: string };
+  geo: { lat: number; lng: number };
   infos: RawInfo[];
   games: { name: string; infos: RawInfo[] }[]; // TODO name: enum
 }
@@ -24,25 +25,25 @@ export default class Crawler {
   updateTime: Date;
   urls: string[];
 
-  getPaginatedUrlS: (urls: string[]) => string[];
-  getList: (document: Document) => any[];
-  getItem: (item: any) => RawGameCenter;
+  getPaginatedUrls: (url: string) => string[] | Promise<string[]>;
+  getList: (html: any) => any[];
+  getItem: (item: any) => RawGameCenter | Promise<RawGameCenter>;
 
   constructor({
     sourceId,
     urls,
-    getPaginatedUrlS = urls => urls,
+    getPaginatedUrls = url => [url],
     getList,
     getItem
   }: {
     sourceId: string;
     urls: string[];
-    getPaginatedUrlS?: (urls: string[]) => string[];
-    getList: (document: Document) => any[];
-    getItem: (item: any) => any;
+    getPaginatedUrls?: (url: string) => string[] | Promise<string[]>;
+    getList: (html: any) => any[];
+    getItem: (item: any) => RawGameCenter | Promise<RawGameCenter>;
   }) {
     this.urls = urls;
-    this.getPaginatedUrlS = getPaginatedUrlS;
+    this.getPaginatedUrls = getPaginatedUrls;
     this.getList = getList;
     this.getItem = getItem;
 
@@ -52,22 +53,30 @@ export default class Crawler {
 
   async crawlOnePage(url: string): Promise<RawGameCenter[]> {
     const addAdditionInfo = (item: RawInfo) => ({ ...item, url, sourceId: this.sourceId, updateTime: this.updateTime });
-    const html = await fetch(url).then(res => res.text());
-    const { document } = new jsdom.JSDOM(html).window;
-    return this.getList(document)
-      .map(this.getItem)
-      .map(gameCenterItem => ({
-        ...gameCenterItem,
-        infos: gameCenterItem.infos.map(addAdditionInfo),
-        games: gameCenterItem.games.map(gameItem => ({
-          ...gameItem,
-          infos: gameItem.infos.map(addAdditionInfo)
-        }))
-      }));
+    const htmlBuffer = await fetch(url).then(res => res.arrayBuffer());
+    const htmlUnit8Array = new Uint8Array(htmlBuffer);
+    const unicodeArray = Encoding.convert(htmlUnit8Array, {
+      to: "UNICODE",
+      from: Encoding.detect(htmlUnit8Array)
+    });
+    // @ts-ignore
+    const htmlText = Encoding.codeToString(unicodeArray);
+    const { document } = new jsdom.JSDOM(htmlText).window;
+
+    const items = await Promise.all(this.getList(document).map(this.getItem));
+    return items.map(gameCenterItem => ({
+      ...gameCenterItem,
+      infos: gameCenterItem.infos.map(addAdditionInfo),
+      games: gameCenterItem.games.map(gameItem => ({
+        ...gameItem,
+        infos: gameItem.infos.map(addAdditionInfo)
+      }))
+    }));
   }
 
   async start() {
-    this.urls = this.getPaginatedUrlS(this.urls);
+    const paginatedUrls = await Promise.all(this.urls.map(this.getPaginatedUrls));
+    this.urls = [].concat(...paginatedUrls);
     const promises = this.urls.map(async url => await this.crawlOnePage(url));
     const results = await Promise.all(promises);
     const flatResults = ([] as RawGameCenter[]).concat(...results);
@@ -99,13 +108,12 @@ export default class Crawler {
           let currentGame;
           let index = gameCenterEntity.games.findIndex(x => x.name === gameItem.name);
           if (index >= 0) {
-            currentGame = gameCenterEntity.games[index];
+            const currentGameInfos = gameCenterEntity.games[index].infos;
+            gameCenterEntity.games[index].infos = [...currentGameInfos, ...gameItem.infos];
           } else {
-            currentGame = { name: gameItem.name, infos: [] };
+            currentGame = { name: gameItem.name, infos: gameItem.infos };
             gameCenterEntity.games.push(currentGame);
           }
-
-          currentGame.infos = currentGame.infos.concat(gameItem.infos);
         });
 
         await gameCenterEntity.save();
