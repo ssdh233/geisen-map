@@ -32,6 +32,7 @@ const useStyles = makeStyles({
 
 interface Props {
   setViewport: any,
+  setAboutSideOpen: any
 }
 
 function SearchBar(props: Props) {
@@ -96,7 +97,7 @@ function SearchBar(props: Props) {
       }) => (
           <div>
             <Paper className={classes.root}>
-              <IconButton className={classes.iconButton} aria-label="menu">
+              <IconButton className={classes.iconButton} aria-label="menu" onClick={() => props.setAboutSideOpen(true)}>
                 <MenuIcon />
               </IconButton>
               <InputBase

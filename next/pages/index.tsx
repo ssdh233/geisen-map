@@ -10,8 +10,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 
 import debounce from "../utils/debounce";
 
-// import Side from "../components/Side";
-const Side = dynamic(() => import("../components/Side"), {
+const MainSide = dynamic(() => import("../components/MainSide"), {
   ssr: false
 });
 
@@ -192,7 +191,7 @@ function IndexPage(props: Prop) {
           <MyLocationButton fontSize="small" />
         </Fab>
       </Map>
-      <Side gameCenterId={gameCenterId} gameCenterData={gameCenterData} filter={filter} setFilter={setFilter} setViewport={setViewport} />
+      <MainSide gameCenterId={gameCenterId} gameCenterData={gameCenterData} filter={filter} setFilter={setFilter} setViewport={setViewport} />
       <Snackbar
         anchorOrigin={{
           vertical: 'bottom',

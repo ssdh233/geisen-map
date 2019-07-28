@@ -11,6 +11,7 @@ import Divider from '@material-ui/core/Divider';
 
 import SearchBar from "./SearchBar";
 import GameCenterInfo from "./GameCenterInfo";
+import AboutSide from "./AboutSide";
 
 const toggleStyle = {
   color: "rgba(0, 0, 0, 0.54)",
@@ -56,8 +57,10 @@ interface Props {
   setViewport: any
 }
 
-function Side(props: Props) {
+function MainSide(props: Props) {
   const [open, setOpen] = useState(true);
+  const [aboutSideOpen, setAboutSideOpen] = useState(false);
+
   const classes = useStyles();
 
   return (
@@ -71,7 +74,7 @@ function Side(props: Props) {
       }}>
         <button className={classes.closeButton} onClick={() => setOpen(false)}><ArrowLeftIcon /></button>
         <div className={classes.searchArea}>
-          <SearchBar setViewport={props.setViewport} />
+          <SearchBar setViewport={props.setViewport} setAboutSideOpen={setAboutSideOpen} />
           <FormGroup row className={classes.checkboxes}>
             <FormControl component="fieldset">
               <FormGroup>
@@ -99,9 +102,10 @@ function Side(props: Props) {
         </div>
         <Divider />
         <GameCenterInfo data={props.gameCenterData} />
+        <AboutSide open={aboutSideOpen} setAboutSideOpen={setAboutSideOpen} />
       </Drawer>
     </div>
   );
 }
 
-export default Side;
+export default MainSide;
