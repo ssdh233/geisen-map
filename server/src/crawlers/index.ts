@@ -42,16 +42,18 @@ const popnCrawler = new Crawler({
   sourceId: "popn_official",
   urls: Array(47) // max 47
     .fill(0)
-    .map(
-      (_, i) => `https://p.eagate.573.jp/game/popn/peace/p/tenpo/list.html?pref=${i + 1}&search_word=&pcb_type=2&page=0`
-    ),
+    .map((_, i) => `https://p.eagate.573.jp/game/popn/peace/p/tenpo/list.html?pref=${i + 1}&search_word=&pcb_type=2`),
   getPaginatedUrls: async url => {
     const html = await fetch(url).then(res => res.text());
     const { document } = new jsdom.JSDOM(html).window;
     const pages = document.querySelectorAll("div.Rcont_inner > div[style='text-align:center'] > a").length;
-    return Array(pages)
-      .fill(0)
-      .map((_, i) => `${url}&page=${i}`);
+    if (pages === 0) {
+      return [url];
+    } else {
+      return Array(pages)
+        .fill(0)
+        .map((_, i) => `${url}&page=${i}`);
+    }
   },
   getList: document => {
     return Array.from(document.querySelectorAll("div.Rcont_info > div > div.tenpo_data"));
@@ -116,7 +118,7 @@ const popnCrawler = new Crawler({
           address && { infoType: "address", text: address },
           access && { infoType: "access", text: access },
           businessHour && { infoType: "businessHour", text: businessHour },
-          closedDay && { infoType: "closedDay", text: closedDay },
+          closedDay && { infoType: "closedDay", text: "定休日 " + closedDay },
           tel && { infoType: "tel", text: tel }
         ].filter(x => x),
         games: [
@@ -130,6 +132,8 @@ const popnCrawler = new Crawler({
           }
         ]
       };
+
+      console.log("getting info:", name);
 
       return result;
     } catch (error) {

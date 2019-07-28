@@ -5,6 +5,8 @@
   "author": "matsumatsu233 <songsongdahu233@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@material-ui/core": "^4.2.1",
+    "@material-ui/icons": "^4.2.1",
     "isomorphic-unfetch": "^3.0.0",
     "leaflet": "^1.5.1",
     "next": "^9.0.2",

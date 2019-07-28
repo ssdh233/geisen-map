@@ -1,8 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Head from "next/head";
 import fetch from "isomorphic-unfetch";
 import reactLeaflet from "react-leaflet";
+
+// import Side from "../components/Side";
+const Side = dynamic(() => import("../components/Side"), {
+  ssr: false
+});
 
 // TODO make it look better
 // @ts-ignore
@@ -25,13 +30,19 @@ const Popup = dynamic(() => import("react-leaflet/lib/Popup"), {
   ssr: false
 });
 
+// @ts-ignore
+const ZoomControl = dynamic(() => import("react-leaflet/lib/ZoomControl"), {
+  ssr: false
+});
 
 interface Prop {
-  gamecenters: any[]
+  gamecenters: any[] // TODO
 }
 
 function IndexPage(props: Prop) {
-  const [viewport, setViewport] = useState({ center: [35.701037, 139.742011], zoom: 10 } as reactLeaflet.Viewport);
+  const [viewport, setViewport] = useState({ center: [35.6028, 139.6196], zoom: 15 } as reactLeaflet.Viewport);
+  const [gameCenterId, setGameCenterId] = useState("");
+  const [gameCenterData, setGameCenterData] = useState(null);
 
   function handleViewportChange(viewport: reactLeaflet.Viewport) {
     // @ts-ignore
@@ -45,46 +56,68 @@ function IndexPage(props: Prop) {
 
   const gamecenters = getVisibleGamecenters(props.gamecenters, viewport);
 
+  useEffect(() => {
+    async function myFunc() {
+      if (gameCenterId) {
+        const res = await fetch(`http://localhost:4000/gamecenter/${gameCenterId}`);
+        const data = await res.json();
+        setGameCenterData(data);
+      }
+    }
+
+    myFunc();
+  }, [gameCenterId]);
+
   console.log("rendered marks:", gamecenters.length);
   return (
     <div>
       <Head>
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" />
-        <style>
-          {
-            `
-            body {
-              padding: 0;
-              margin: 0;
-            }
-            .leaflet-container {
-              position: absolute;
-              width: 100%;
-              height: 99%;
-            }
-          `}
-        </style>
       </Head>
+      <style jsx global>{`
+          h1, h2, h3 {
+            margin: 0;
+          }
+
+          ul {
+            padding-left: 20px;
+          }
+
+          body {
+            padding: 0;
+            margin: 0;
+          }
+          .leaflet-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+          }
+        `}
+      </style>
       {/*
         // @ts-ignore*/}
-      <Map viewport={viewport} onViewportChange={handleViewportChange}>
+      <Map viewport={viewport} onViewportChange={handleViewportChange} zoomControl={false}>
         {/*
         // @ts-ignore*/}
         <TileLayer
           attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        {/*
+        // @ts-ignore*/}
+        <ZoomControl position="bottomright" />
         {
           // props.gamecenters.map((gamecenter) => <GameCenterMarker key={gamecenter.id} {...gamecenter} />)
           gamecenters.map(({ id, geo, infos }) => {
             // @ts-ignore
-            return <Marker key={id} position={[geo.lat, geo.lng]} >
+            return <Marker key={id} position={[geo.lat, geo.lng]} onClick={() => setGameCenterId(id)} >
               <Popup>{infos[0].text}</Popup>
             </Marker>
           })
         }
       </Map>
-    </div>
+      <Side gameCenterId={gameCenterId} gameCenterData={gameCenterData} />
+    </div >
   );
 }
 

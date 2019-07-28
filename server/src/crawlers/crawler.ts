@@ -52,7 +52,6 @@ export default class Crawler {
   }
 
   async crawlOnePage(url: string): Promise<RawGameCenter[]> {
-    console.log("crawling ", url);
     const addAdditionInfo = (item: RawInfo) => ({ ...item, url, sourceId: this.sourceId, updateTime: this.updateTime });
     const htmlBuffer = await fetch(url).then(res => res.arrayBuffer());
     const htmlUnit8Array = new Uint8Array(htmlBuffer);
@@ -65,23 +64,34 @@ export default class Crawler {
     const { document } = new jsdom.JSDOM(htmlText).window;
 
     const items = await Promise.all(this.getList(document).map(this.getItem));
-    return items.filter(x => x).map(gameCenterItem => ({
-      ...gameCenterItem,
-      infos: gameCenterItem.infos.map(addAdditionInfo),
-      games: gameCenterItem.games.map(gameItem => ({
-        ...gameItem,
-        infos: gameItem.infos.map(addAdditionInfo)
-      }))
-    }));
+
+    console.log("crawling:", url, "results:", items.length);
+    return items
+      .filter(x => x)
+      .map(gameCenterItem => ({
+        ...gameCenterItem,
+        infos: gameCenterItem.infos.map(addAdditionInfo),
+        games: gameCenterItem.games.map(gameItem => ({
+          ...gameItem,
+          infos: gameItem.infos.map(addAdditionInfo)
+        }))
+      }));
   }
 
   async start() {
     const that = this;
     const paginatedUrls = await Promise.all(this.urls.map(this.getPaginatedUrls));
     this.urls = [].concat(...paginatedUrls);
-    const promises = this.urls.map(async url => await this.crawlOnePage(url));
+
+    const promises = [];
+    for (let i = 0; i < this.urls.length; i++) {
+      promises.push(this.crawlOnePage(this.urls[i]));
+      await sleep(10);
+    }
     const results = await Promise.all(promises);
     const flatResults = ([] as RawGameCenter[]).concat(...results);
+
+    console.log(flatResults.length);
 
     // TODO move this logic to somewhere
     mongoose.connect("mongodb://localhost/geisenmap", { useNewUrlParser: true });
@@ -131,4 +141,8 @@ export default class Crawler {
       db.close();
     });
   }
+}
+
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
