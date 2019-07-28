@@ -2,8 +2,9 @@ import express from "express";
 import gameCenterApi from "./apis/gameCenter";
 import geoInfoApi from "./apis/geoInfo";
 import mongoose from "mongoose";
+require("dotenv").config();
 
-mongoose.connect("mongodb://localhost/geisenmap", { useNewUrlParser: true });
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
 

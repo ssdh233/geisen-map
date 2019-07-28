@@ -7,8 +7,13 @@ import Fab from '@material-ui/core/Fab';
 import MyLocationButton from '@material-ui/icons/MyLocation';
 import { makeStyles } from '@material-ui/core/styles';
 import Snackbar from '@material-ui/core/Snackbar';
+import getConfig from 'next/config'
 
 import debounce from "../utils/debounce";
+
+const { publicRuntimeConfig } = getConfig();
+const { API_URL } = publicRuntimeConfig;
+
 
 const MainSide = dynamic(() => import("../components/MainSide"), {
   ssr: false
@@ -125,7 +130,7 @@ function IndexPage(props: Prop) {
   useEffect(() => {
     async function myFunc() {
       if (gameCenterId) {
-        const res = await fetch(`http://localhost:4000/gamecenter/${gameCenterId}`);
+        const res = await fetch(`${API_URL}/gamecenter/${gameCenterId}`);
         const data = await res.json();
         setGameCenterData(data);
       }
@@ -238,7 +243,8 @@ function getVisibleGamecenters(gamecenters: any[], viewport: reactLeaflet.Viewpo
 }
 
 IndexPage.getInitialProps = async function () {
-  const res = await fetch("http://localhost:4000/gamecenters");
+  console.log({ API_URL })
+  const res = await fetch(`${API_URL}/gamecenters`);
   const data = await res.json();
 
   console.log(`Show data fetched. Count: ${data.length}`);

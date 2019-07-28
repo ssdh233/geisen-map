@@ -94,7 +94,7 @@ export default class Crawler {
     console.log(flatResults.length);
 
     // TODO move this logic to somewhere
-    mongoose.connect("mongodb://localhost/geisenmap", { useNewUrlParser: true });
+    mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
     const db = mongoose.connection;
     db.on("error", console.error.bind(console, "connection error:"));
     db.once("open", async function() {
