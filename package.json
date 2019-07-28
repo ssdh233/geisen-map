@@ -1,0 +1,7 @@
+{
+  "name": "geisen-map-monorepo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/matsumatsu233/geisen-map.git",
+  "license": "MIT"
+}

@@ -7,6 +7,7 @@
   "dependencies": {
     "@material-ui/core": "^4.2.1",
     "@material-ui/icons": "^4.2.1",
+    "dotenv": "^8.0.0",
     "downshift": "^3.2.10",
     "isomorphic-unfetch": "^3.0.0",
     "leaflet": "^1.5.1",
@@ -18,7 +19,8 @@
   "scripts": {
     "dev": "next",
     "build": "next build",
-    "start": "next start"
+    "prod": "next start -p $PORT",
+    "heroku-postbuild": "yarn build"
   },
   "devDependencies": {
     "@types/node": "^12.6.8",

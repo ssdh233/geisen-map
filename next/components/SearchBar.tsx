@@ -7,6 +7,10 @@ import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
 import MenuItem from '@material-ui/core/MenuItem';
 import Downshift from 'downshift';
+import getConfig from 'next/config'
+
+const { publicRuntimeConfig } = getConfig();
+const { API_URL } = publicRuntimeConfig;
 
 const useStyles = makeStyles({
   root: {
@@ -44,7 +48,7 @@ function SearchBar(props: Props) {
   // TODO debouncing
   async function fetchSuggestions() {
     if (text) {
-      const res = await fetch(`http://localhost:4000/geoInfo?q=${text}`);
+      const res = await fetch(`${API_URL}/geoInfo?q=${text}`);
       if (res.status === 200) {
         const data = await res.json();
         if (data.length > 0) {
@@ -68,7 +72,7 @@ function SearchBar(props: Props) {
   async function hanldeSearch() {
     setSuggestions([]);
     if (text) {
-      const res = await fetch(`http://localhost:4000/geoInfo?q=${text}`);
+      const res = await fetch(`${API_URL}/geoInfo?q=${text}`);
       if (res.status === 200) {
         const data = await res.json();
         if (data.length > 0) {

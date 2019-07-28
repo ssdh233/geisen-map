@@ -21,7 +21,10 @@
     "typescript": "^3.5.3"
   },
   "scripts": {
-    "build": "tsc -w",
-    "dev": "nodemon dist/index.js"
+    "build:watch": "tsc -w",
+    "build": "tsc",
+    "dev": "nodemon dist/index.js",
+    "prod": "node dist/index.js",
+    "heroku-postbuild": "yarn build"
   }
 }

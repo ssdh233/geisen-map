@@ -20,6 +20,18 @@ class MyApp extends App {
       <Container>
         <Head>
           <title>ゲーセンマップ</title>
+          <script async src="https://www.googletagmanager.com/gtag/js?id=UA-89581468-3" />
+          <script>
+            {`
+            console.log("GA scripts started!");
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'UA-89581468-3');
+            console.log("GA scripts executed!");
+            `}
+          </script>
         </Head>
         <ThemeProvider>
           {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
