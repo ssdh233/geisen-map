@@ -71,7 +71,7 @@ const useStyles = makeStyles({
 
 
 function IndexPage(props: Prop) {
-  const [viewport, setViewport] = useState({ center: [35.6028, 139.6196], zoom: 15 } as reactLeaflet.Viewport);
+  const [viewport, setViewport] = useState({ center: [38.5548225, 135.8920016], zoom: 6 } as reactLeaflet.Viewport);
   const [userLocation, setUserLocation] = useState([] as number[]);
   const [gameCenterId, setGameCenterId] = useState("");
   const [gameCenterData, setGameCenterData] = useState(null);
@@ -80,6 +80,7 @@ function IndexPage(props: Prop) {
     popn: true,
   })
 
+  console.log(viewport.center, viewport.zoom)
   const classes = useStyles();
 
   function handleViewportChange(viewport: reactLeaflet.Viewport) {

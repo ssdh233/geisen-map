@@ -19,7 +19,8 @@
   "scripts": {
     "dev": "next",
     "build": "next build",
-    "start": "next start"
+    "prod": "next start -p $PORT",
+    "heroku-postbuild": "yarn build"
   },
   "devDependencies": {
     "@types/node": "^12.6.8",
