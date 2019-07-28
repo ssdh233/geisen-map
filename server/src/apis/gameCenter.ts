@@ -38,10 +38,18 @@ const gameCenterApi = (app: express.Express) => {
           _id: 0,
           id: 1,
           geo: 1,
-          infos: { $filter: { input: "$infos", as: "info", cond: { $eq: ["$$info.infoType", "name"] } } }
+          infos: { $filter: { input: "$infos", as: "info", cond: { $eq: ["$$info.infoType", "name"] } } },
+          games: { $map: { input: "$games", as: "game", in: "$$game.name" } }
         }
       },
-      { $project: { id: 1, geo: 1, "infos.infoType": 1, "infos.text": 1 } }
+      {
+        $project: {
+          id: 1,
+          geo: 1,
+          name: { $arrayElemAt: [{ $map: { input: "$infos", as: "info", in: "$$info.text" } }, 0] },
+          games: 1
+        }
+      }
     ]);
     res.json(result);
   });

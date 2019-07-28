@@ -43,6 +43,10 @@ function IndexPage(props: Prop) {
   const [viewport, setViewport] = useState({ center: [35.6028, 139.6196], zoom: 15 } as reactLeaflet.Viewport);
   const [gameCenterId, setGameCenterId] = useState("");
   const [gameCenterData, setGameCenterData] = useState(null);
+  const [filter, setFilter] = useState({
+    taiko: true,
+    popn: true,
+  })
 
   function handleViewportChange(viewport: reactLeaflet.Viewport) {
     // @ts-ignore
@@ -54,7 +58,8 @@ function IndexPage(props: Prop) {
     setViewport(viewport)
   }
 
-  const gamecenters = getVisibleGamecenters(props.gamecenters, viewport);
+  const filteredGamecenters = filterGamecenters(props.gamecenters, filter);
+  const gamecenters = getVisibleGamecenters(filteredGamecenters, viewport);
 
   useEffect(() => {
     async function myFunc() {
@@ -96,7 +101,7 @@ function IndexPage(props: Prop) {
       </style>
       {/*
         // @ts-ignore*/}
-      <Map viewport={viewport} onViewportChange={handleViewportChange} zoomControl={false}>
+      <Map viewport={viewport} onViewportChange={debounce(handleViewportChange, 100)} zoomControl={false}>
         {/*
         // @ts-ignore*/}
         <TileLayer
@@ -107,18 +112,36 @@ function IndexPage(props: Prop) {
         // @ts-ignore*/}
         <ZoomControl position="bottomright" />
         {
-          // props.gamecenters.map((gamecenter) => <GameCenterMarker key={gamecenter.id} {...gamecenter} />)
-          gamecenters.map(({ id, geo, infos }) => {
+          gamecenters.map(({ id, geo, name }) => {
             // @ts-ignore
             return <Marker key={id} position={[geo.lat, geo.lng]} onClick={() => setGameCenterId(id)} >
-              <Popup>{infos[0].text}</Popup>
+              <Popup>{name}</Popup>
             </Marker>
           })
         }
       </Map>
-      <Side gameCenterId={gameCenterId} gameCenterData={gameCenterData} />
+      <Side gameCenterId={gameCenterId} gameCenterData={gameCenterData} filter={filter} setFilter={setFilter} />
     </div >
   );
+}
+
+function debounce(func: any, delay: number) {
+  // @ts-ignore
+  let inDebounce;
+  return function () {
+    // @ts-ignore
+    const context = this;
+    const args = arguments;
+    // @ts-ignore
+    clearTimeout(inDebounce);
+    inDebounce = setTimeout(() => func.apply(context, args), delay)
+  }
+}
+
+function filterGamecenters(gamecenters: any[], filter: any): any[] {
+  return gamecenters.filter(gamecenter => {
+    return gamecenter.games.some((game: any) => filter[game]);
+  });
 }
 
 function getVisibleGamecenters(gamecenters: any[], viewport: reactLeaflet.Viewport): any[] {
@@ -132,11 +155,9 @@ function getVisibleGamecenters(gamecenters: any[], viewport: reactLeaflet.Viewpo
   let latRange = 2 ** 10 / rangeRadio;
   let lngRnage = 2 ** 10 / rangeRadio;
 
-  console.log({ latRange, lngRnage });
-
   let filtered = gamecenters;
 
-  while (filtered.length > 300) {
+  while (filtered.length > 500) {
     filtered = gamecenters.filter(({ geo }) => {
       // @ts-ignore*/
       return Math.abs(geo.lat - lat) < (latRange) && Math.abs(geo.lng - lng) < (lngRnage);

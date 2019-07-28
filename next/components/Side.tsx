@@ -66,20 +66,21 @@ const useStyles = makeStyles({
     left: 0,
     top: 8,
   },
-
+  checkboxes: {
+    paddingLeft: 16
+  }
 });
 
 interface Props {
   gameCenterId: string;
-  gameCenterData: any
+  gameCenterData: any,
+  filter: any,
+  setFilter: any
 }
 
 function Side(props: Props) {
   const [open, setOpen] = useState(true);
-  const [filters, setFilters] = useState({ popn: false, taiko: false });
   const classes = useStyles();
-
-  console.log(setFilters);
 
   return (
     <div style={{ border: "5px solid red" }}>
@@ -105,18 +106,26 @@ function Side(props: Props) {
               <SearchIcon />
             </IconButton>
           </Paper>
-          <FormGroup row>
+          <FormGroup row className={classes.checkboxes}>
             <FormControl component="fieldset">
               <FormGroup>
                 <FormControlLabel
-                  control={<Checkbox checked={filters.popn} value="popn" />}
+                  control={<Checkbox
+                    checked={props.filter.popn}
+                    onChange={() => props.setFilter((filter: any) => ({ ...filter, popn: !filter.popn }))}
+                    value="popn"
+                    color="primary" />
+                  }
                   label="ポップン"
-                  color="primary"
                 />
                 <FormControlLabel
-                  control={<Checkbox checked={filters.taiko} value="taiko" />}
+                  control={<Checkbox
+                    checked={props.filter.taiko}
+                    onChange={() => props.setFilter((filter: any) => ({ ...filter, taiko: !filter.taiko }))}
+                    value="taiko"
+                    color="primary" />
+                  }
                   label="太鼓の達人"
-                  color="primary"
                 />
               </FormGroup>
             </FormControl>
