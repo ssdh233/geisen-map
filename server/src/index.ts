@@ -1,5 +1,6 @@
 import express from "express";
 import gameCenterApi from "./apis/gameCenter";
+import geoInfoApi from "./apis/geoInfo";
 import mongoose from "mongoose";
 
 mongoose.connect("mongodb://localhost/geisenmap", { useNewUrlParser: true });
@@ -16,6 +17,7 @@ app.use(function(req, res, next) {
 })
 
 gameCenterApi(app);
+geoInfoApi(app);
 
 // start the express server
 app.listen(port, () => {

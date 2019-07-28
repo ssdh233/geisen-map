@@ -6,6 +6,9 @@ import reactLeaflet from "react-leaflet";
 import Fab from '@material-ui/core/Fab';
 import MyLocationButton from '@material-ui/icons/MyLocation';
 import { makeStyles } from '@material-ui/core/styles';
+import Snackbar from '@material-ui/core/Snackbar';
+
+import debounce from "../utils/debounce";
 
 // import Side from "../components/Side";
 const Side = dynamic(() => import("../components/Side"), {
@@ -85,6 +88,7 @@ function IndexPage(props: Prop) {
   }
 
   function handleHomeButtonClick() {
+    console.log("handleHomeButtonClick");
     if (userLocation.length > 1) {
       //@ts-ignore
       setViewport({ center: userLocation, zoom: 14 });
@@ -188,22 +192,18 @@ function IndexPage(props: Prop) {
           <MyLocationButton fontSize="small" />
         </Fab>
       </Map>
-      <Side gameCenterId={gameCenterId} gameCenterData={gameCenterData} filter={filter} setFilter={setFilter} />
+      <Side gameCenterId={gameCenterId} gameCenterData={gameCenterData} filter={filter} setFilter={setFilter} setViewport={setViewport} />
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        // @ts-ignore
+        open={viewport.zoom < 10}
+        message={<span>ズームインしてゲームセンターの情報を表示する</span>}
+      />
     </div >
   );
-}
-
-function debounce(func: any, delay: number) {
-  // @ts-ignore
-  let inDebounce;
-  return function () {
-    // @ts-ignore
-    const context = this;
-    const args = arguments;
-    // @ts-ignore
-    clearTimeout(inDebounce);
-    inDebounce = setTimeout(() => func.apply(context, args), delay)
-  }
 }
 
 function filterGamecenters(gamecenters: any[], filter: any): any[] {
@@ -225,7 +225,7 @@ function getVisibleGamecenters(gamecenters: any[], viewport: reactLeaflet.Viewpo
 
   let filtered = gamecenters;
 
-  while (filtered.length > 500) {
+  while (filtered.length > 300) {
     filtered = gamecenters.filter(({ geo }) => {
       // @ts-ignore*/
       return Math.abs(geo.lat - lat) < (latRange) && Math.abs(geo.lng - lng) < (lngRnage);

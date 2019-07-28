@@ -1,11 +1,6 @@
 import { useState } from "react";
 import { makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
-import Paper from '@material-ui/core/Paper';
-import IconButton from '@material-ui/core/IconButton';
-import InputBase from '@material-ui/core/InputBase';
-import MenuIcon from '@material-ui/icons/Menu';
-import SearchIcon from '@material-ui/icons/Search';
 import ArrowLeftIcon from '@material-ui/icons/ArrowLeft';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import FormControl from '@material-ui/core/FormControl';
@@ -14,6 +9,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Divider from '@material-ui/core/Divider';
 
+import SearchBar from "./SearchBar";
 import GameCenterInfo from "./GameCenterInfo";
 
 const toggleStyle = {
@@ -29,25 +25,6 @@ const toggleStyle = {
 }
 
 const useStyles = makeStyles({
-  root: {
-    padding: '2px 4px',
-    display: 'flex',
-    alignItems: 'center',
-    width: 400,
-    marginBottom: 8
-  },
-  input: {
-    marginLeft: 8,
-    flex: 1,
-  },
-  iconButton: {
-    padding: 10,
-  },
-  divider: {
-    width: 1,
-    height: 28,
-    margin: 4,
-  },
   searchArea: {
     padding: 8,
     marginBottom: 8
@@ -75,7 +52,8 @@ interface Props {
   gameCenterId: string;
   gameCenterData: any,
   filter: any,
-  setFilter: any
+  setFilter: any,
+  setViewport: any
 }
 
 function Side(props: Props) {
@@ -93,19 +71,7 @@ function Side(props: Props) {
       }}>
         <button className={classes.closeButton} onClick={() => setOpen(false)}><ArrowLeftIcon /></button>
         <div className={classes.searchArea}>
-          <Paper className={classes.root}>
-            <IconButton className={classes.iconButton} aria-label="menu">
-              <MenuIcon />
-            </IconButton>
-            <InputBase
-              className={classes.input}
-              placeholder=""
-              inputProps={{ 'aria-label': '' }}
-            />
-            <IconButton className={classes.iconButton} aria-label="search">
-              <SearchIcon />
-            </IconButton>
-          </Paper>
+          <SearchBar setViewport={props.setViewport} />
           <FormGroup row className={classes.checkboxes}>
             <FormControl component="fieldset">
               <FormGroup>
