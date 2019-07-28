@@ -3,6 +3,9 @@ import dynamic from "next/dynamic";
 import Head from "next/head";
 import fetch from "isomorphic-unfetch";
 import reactLeaflet from "react-leaflet";
+import Fab from '@material-ui/core/Fab';
+import MyLocationButton from '@material-ui/icons/MyLocation';
+import { makeStyles } from '@material-ui/core/styles';
 
 // import Side from "../components/Side";
 const Side = dynamic(() => import("../components/Side"), {
@@ -35,12 +38,34 @@ const ZoomControl = dynamic(() => import("react-leaflet/lib/ZoomControl"), {
   ssr: false
 });
 
+// @ts-ignore
+const CircleMarker = dynamic(() => import("react-leaflet/lib/CircleMarker"), {
+  ssr: false
+});
+
 interface Prop {
   gamecenters: any[] // TODO
 }
 
+const useStyles = makeStyles({
+  homeButton: {
+    position: "absolute",
+    right: 12,
+    bottom: 100,
+    zIndex: 1001,
+    padding: 0,
+    backgroundColor: "white",
+    width: 30,
+    height: 30,
+    minHeight: 30,
+    borderRadius: 5
+  }
+});
+
+
 function IndexPage(props: Prop) {
   const [viewport, setViewport] = useState({ center: [35.6028, 139.6196], zoom: 15 } as reactLeaflet.Viewport);
+  const [userLocation, setUserLocation] = useState([] as number[]);
   const [gameCenterId, setGameCenterId] = useState("");
   const [gameCenterData, setGameCenterData] = useState(null);
   const [filter, setFilter] = useState({
@@ -48,14 +73,47 @@ function IndexPage(props: Prop) {
     popn: true,
   })
 
+  const classes = useStyles();
+
   function handleViewportChange(viewport: reactLeaflet.Viewport) {
     // @ts-ignore
     if (viewport!.zoom >= 19) {
       viewport.zoom = 19;
     }
 
-    console.log(viewport.center, viewport.zoom);
     setViewport(viewport)
+  }
+
+  function handleHomeButtonClick() {
+    if (userLocation.length > 1) {
+      //@ts-ignore
+      setViewport({ center: userLocation, zoom: 14 });
+    } else {
+      // TODO tell user to set permission
+    }
+  }
+
+  function requestUserLocation() {
+    let startPos;
+    let geoOptions = {
+      timeout: 10 * 1000
+    }
+
+    let geoSuccess = function (position: any) {
+      startPos = position;
+      setViewport({ center: [startPos.coords.latitude, startPos.coords.longitude], zoom: 14 });
+      setUserLocation([startPos.coords.latitude, startPos.coords.longitude]);
+    };
+    let geoError = function (error: any) {
+      console.log('Error occurred. Error code: ' + error.code);
+      // error.code can be:
+      //   0: unknown error
+      //   1: permission denied
+      //   2: position unavailable (error response from location provider)
+      //   3: timed out
+    };
+
+    navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geoOptions);
   }
 
   const filteredGamecenters = filterGamecenters(props.gamecenters, filter);
@@ -72,6 +130,8 @@ function IndexPage(props: Prop) {
 
     myFunc();
   }, [gameCenterId]);
+
+  useEffect(() => requestUserLocation(), [])
 
   console.log("rendered marks:", gamecenters.length);
   return (
@@ -119,6 +179,14 @@ function IndexPage(props: Prop) {
             </Marker>
           })
         }
+        {
+          userLocation.length > 1 &&
+          // @ts-ignore
+          <CircleMarker center={userLocation} radius={10} />
+        }
+        <Fab size="small" className={classes.homeButton} onClick={handleHomeButtonClick}>
+          <MyLocationButton fontSize="small" />
+        </Fab>
       </Map>
       <Side gameCenterId={gameCenterId} gameCenterData={gameCenterData} filter={filter} setFilter={setFilter} />
     </div >
