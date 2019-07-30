@@ -1,14 +1,12 @@
 import express from "express";
-import mongoose, { mongo } from "mongoose";
-import GeoInfoSchema from "../schemas/geoInfo";
+import GeoInfoModel from "../models/geoInfo";
 
 const geoInfoApi = (app: express.Express) => {
   app.get("/geoinfo", async (req, res) => {
     if (req.query.q) {
-      const GeoInfo = mongoose.model("geoInfo", GeoInfoSchema);
-      let result = await GeoInfo.find({ text: { $regex: new RegExp(`.*${req.query.q}.*`) } }, { _id: 0 });
+      let result = await GeoInfoModel.find({ text: { $regex: new RegExp(`.*${req.query.q}.*`) } }, { _id: 0 });
 
-      result = result.sort((a: any, b: any) => {
+      result = result.sort((a, b) => {
         if (a.text.startsWith(req.query.q)) {
           return -1;
         }
