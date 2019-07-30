@@ -1,8 +1,10 @@
 import { Fragment } from "react";
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from "@material-ui/core/styles";
+
+import { GameCenter } from "../types";
 
 interface Prop {
-  data: any
+  data: GameCenter;
 }
 
 const useStyles = makeStyles({
@@ -12,7 +14,7 @@ const useStyles = makeStyles({
   },
   name: {
     marginBottom: 20
-  },
+  }
 });
 
 function GameCenterInfo(props: Prop) {
@@ -21,34 +23,37 @@ function GameCenterInfo(props: Prop) {
   const { name, infos, games } = props.data;
   const classes = useStyles();
 
-  return <div className={classes.gameCenterInfo}>
-    <h2 className={classes.name}>{name}</h2>
-    <h3>店舗情報</h3>
-    <ul>
-      {infos && infos.filter((info: any) => info.infoType !== "name").map((info: any) => (
-        <li key={info.infoType}>
-          {info.text}
-        </li>
-      ))}
-    </ul>
-    <h3>ゲーム情報</h3>
-    <ul>
-      {games && games.map((game: any) => (
-        <Fragment key={game.name}>
-          <li>{game.name}</li>
-          {game.infos.length > 0 &&
-            <ul>
-              {game.infos && game.infos.filter((gameInfo: any) => gameInfo.infoType !== "main").map(((gameInfo: any) => (
-                <li key={gameInfo.infoType}>
-                  {gameInfo.text}
-                </li>
-              )))}
-            </ul>
-          }
-        </Fragment>
-      ))}
-    </ul>
-  </div >
+  return (
+    <div className={classes.gameCenterInfo}>
+      <h2 className={classes.name}>{name}</h2>
+      <h3>店舗情報</h3>
+      <ul>
+        {infos &&
+          infos
+            .filter(info => info.infoType !== "name")
+            .map(info => <li key={info.infoType}>{info.text}</li>)}
+      </ul>
+      <h3>ゲーム情報</h3>
+      <ul>
+        {games &&
+          games.map(game => (
+            <Fragment key={game.name}>
+              <li>{game.name}</li>
+              {game.infos.length > 0 && (
+                <ul>
+                  {game.infos &&
+                    game.infos
+                      .filter(gameInfo => gameInfo.infoType !== "main")
+                      .map(gameInfo => (
+                        <li key={gameInfo.infoType}>{gameInfo.text}</li>
+                      ))}
+                </ul>
+              )}
+            </Fragment>
+          ))}
+      </ul>
+    </div>
+  );
 }
 
 export default GameCenterInfo;

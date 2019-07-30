@@ -21,7 +21,7 @@ const taikoCrawler = new Crawler({
     const endIndex = scriptContent.indexOf("];", startIndex);
 
     const locationDefinitionCode = scriptContent.substring(startIndex, endIndex + 2);
-    const sandbox: { locations: any[] } = { locations: [] };
+    const sandbox = { locations: [] as any[] };
     vm.createContext(sandbox);
     vm.runInContext(locationDefinitionCode, sandbox);
 
@@ -33,7 +33,7 @@ const taikoCrawler = new Crawler({
       id,
       geo: { lat: raw.latitude, lng: raw.longitude },
       infos: [{ infoType: "name", text: raw.name }, { infoType: "address", text: raw.address }],
-      games: [{ name: "taiko", infos: [{ infoType: "main", text: "" }] }]
+      games: [{ name: "taiko", infos: [{ infoType: "main", text: "" }] }],
     };
   }
 });
@@ -83,8 +83,8 @@ const popnCrawler = new Crawler({
       const popnCard = popnCardImageSrc.includes("card_ok.gif")
         ? "ポップンカードあり"
         : popnCardImageSrc.includes("card_ng.gif")
-        ? "ポップンカード準備中..."
-        : "";
+          ? "ポップンカード準備中..."
+          : "";
 
       const paseriImageSrc =
         (raw.children[11].children[3].children[0] && raw.children[11].children[3].children[0].src) || "";
@@ -92,17 +92,17 @@ const popnCrawler = new Crawler({
 
       const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${
         process.env.GOOGLE_MAP_API_KEY
-      }`;
+        }`;
 
       const geocodingApiRes = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${
-          process.env.GOOGLE_MAP_API_KEY
+        process.env.GOOGLE_MAP_API_KEY
         }`
       ).then(res => res.json());
       console.log(
         "calling google map api: ",
         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${
-          process.env.GOOGLE_MAP_API_KEY
+        process.env.GOOGLE_MAP_API_KEY
         }`
       );
 

@@ -3,22 +3,7 @@ import mongoose from "mongoose";
 import Encoding from "encoding-japanese";
 import jsdom from "jsdom";
 
-import gameCenterSchema from "../schemas/gameCenter";
-
-interface RawInfo {
-  infoType: string; // TODO enum
-  text: string;
-  sourceId?: String;
-  url?: String;
-  updateTime?: Date;
-}
-
-interface RawGameCenter {
-  id: string;
-  geo: { lat: number; lng: number };
-  infos: RawInfo[];
-  games: { name: string; infos: RawInfo[] }[]; // TODO name: enum
-}
+import GameCenterModel, { GameCenter, Info } from "../models/gameCenter";
 
 export default class Crawler {
   sourceId: string;
@@ -26,8 +11,8 @@ export default class Crawler {
   urls: string[];
 
   getPaginatedUrls: (url: string) => string[] | Promise<string[]>;
-  getList: (html: any) => any[];
-  getItem: (item: any) => RawGameCenter | Promise<RawGameCenter> | null;
+  getList: (html: Document) => any[];
+  getItem: (item: any) => GameCenter | Promise<GameCenter> | null;
 
   constructor({
     sourceId,
@@ -40,7 +25,7 @@ export default class Crawler {
     urls: string[];
     getPaginatedUrls?: (url: string) => string[] | Promise<string[]>;
     getList: (html: any) => any[];
-    getItem: (item: any) => RawGameCenter | Promise<RawGameCenter>;
+    getItem: (item: any) => GameCenter | Promise<GameCenter>;
   }) {
     this.urls = urls;
     this.getPaginatedUrls = getPaginatedUrls;
@@ -51,15 +36,17 @@ export default class Crawler {
     this.updateTime = new Date();
   }
 
-  async crawlOnePage(url: string): Promise<RawGameCenter[]> {
-    const addAdditionInfo = (item: RawInfo) => ({ ...item, url, sourceId: this.sourceId, updateTime: this.updateTime });
+  async crawlOnePage(url: string): Promise<GameCenter[]> {
+    const addAdditionInfo = (item: Info) => ({ ...item, url, sourceId: this.sourceId, updateTime: this.updateTime });
     const htmlBuffer = await fetch(url).then(res => res.arrayBuffer());
     const htmlUnit8Array = new Uint8Array(htmlBuffer);
     const unicodeArray = Encoding.convert(htmlUnit8Array, {
       to: "UNICODE",
-      from: Encoding.detect(htmlUnit8Array)
+      from: Encoding.detect(htmlUnit8Array),
+      type: 'array'
     });
-    // @ts-ignore
+
+    // @ts-ignore we know unicodeArray is always number[]
     const htmlText = Encoding.codeToString(unicodeArray);
     const { document } = new jsdom.JSDOM(htmlText).window;
 
@@ -89,7 +76,7 @@ export default class Crawler {
       await sleep(10);
     }
     const results = await Promise.all(promises);
-    const flatResults = ([] as RawGameCenter[]).concat(...results);
+    const flatResults = ([] as GameCenter[]).concat(...results);
 
     console.log(flatResults.length);
 
@@ -97,17 +84,15 @@ export default class Crawler {
     mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
     const db = mongoose.connection;
     db.on("error", console.error.bind(console, "connection error:"));
-    db.once("open", async function() {
+    db.once("open", async function () {
       // TODO clear this part
-      const GameCenter = mongoose.model<RawGameCenter & mongoose.Document>("gameCenter", gameCenterSchema);
-
       // TODO remove all information from that source if there are results (how to check?)
 
       for (let i = 0; i < flatResults.length; i++) {
         const gameCenterItem = flatResults[i];
-        let gameCenterEntity = await GameCenter.findOne({ id: gameCenterItem.id });
+        let gameCenterEntity = await GameCenterModel.findOne({ id: gameCenterItem.id });
         if (!gameCenterEntity) {
-          gameCenterEntity = new GameCenter({
+          gameCenterEntity = new GameCenterModel({
             id: gameCenterItem.id,
             geo: gameCenterItem.geo,
             infos: [],
