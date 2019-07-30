@@ -9,7 +9,8 @@
     "express": "^4.17.1",
     "jsdom": "^15.1.1",
     "mongoose": "^5.6.7",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.0",
+    "typegoose": "^5.9.0"
   },
   "devDependencies": {
     "@types/encoding-japanese": "^1.0.15",

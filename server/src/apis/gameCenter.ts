@@ -1,6 +1,5 @@
 import express from "express";
-import mongoose from "mongoose";
-import GameCenterSchema from "../schemas/gameCenter";
+import GameCenterModel from "../models/gameCenter";
 
 // TODO get this info from mongodb
 const SOURCE_RANK = {
@@ -17,8 +16,7 @@ const gameCenterApi = (app: express.Express) => {
   app.get("/gamecenter/:id", async (req, res) => {
     const { id } = req.params;
 
-    const GameCenter = mongoose.model("gameCenter", GameCenterSchema);
-    const rawResult = await GameCenter.findOne({ id });
+    const rawResult = await GameCenterModel.findOne({ id });
 
     if (rawResult) {
       const result = processRawResult(rawResult);
@@ -30,8 +28,7 @@ const gameCenterApi = (app: express.Express) => {
   });
 
   app.get("/gamecenters", async (req, res) => {
-    const GameCenter = mongoose.model("gameCenter", GameCenterSchema);
-    const result = await GameCenter.aggregate([
+    const result = await GameCenterModel.aggregate([
       { $match: {} },
       {
         $project: {
