@@ -14,6 +14,7 @@ import SearchBar from "./SearchBar";
 import GameCenterInfo from "./GameCenterInfo";
 import AboutSide from "./AboutSide";
 import { Filter, GameCenter } from "../types";
+import { NAME_MAP, intializeFilter } from "../constants/game";
 
 const toggleStyle = {
   color: "rgba(0, 0, 0, 0.54)",
@@ -28,10 +29,6 @@ const toggleStyle = {
 };
 
 const useStyles = makeStyles({
-  searchArea: {
-    padding: 8,
-    marginBottom: 8
-  },
   closeButton: {
     ...toggleStyle,
     position: "absolute",
@@ -46,9 +43,17 @@ const useStyles = makeStyles({
     left: 0,
     top: 8
   },
+  sideContainer: {
+    height: "100%",
+    overflow: "auto"
+  },
   checkboxes: {
     paddingLeft: 16
-  }
+  },
+  searchArea: {
+    padding: 8,
+    marginBottom: 8
+  },
 });
 
 interface Props {
@@ -65,6 +70,26 @@ function MainSide(props: Props) {
 
   const classes = useStyles();
 
+  const FilterCheckBox = ({ gameName }: { gameName: string }) => (
+    <FormControlLabel
+      control={
+        <Checkbox
+          checked={props.filter[gameName]}
+          onChange={() =>
+            props.setFilter(filter => ({
+              ...filter,
+              [gameName]: !filter[gameName]
+            }))
+          }
+          value={gameName}
+          color="primary"
+        />
+      }
+      label={NAME_MAP[gameName]}
+    />
+  );
+
+  const hasSomthingSelected = Object.keys(props.filter).some(gameName => props.filter[gameName]);
   return (
     <div style={{ border: "5px solid red" }}>
       {!open && (
@@ -86,56 +111,35 @@ function MainSide(props: Props) {
         <button className={classes.closeButton} onClick={() => setOpen(false)}>
           <ArrowLeftIcon />
         </button>
-        <div className={classes.searchArea}>
-          <SearchBar
-            onSearch={viewport => props.setViewport(viewport)}
-            onMenuButtonClick={() => setAboutSideOpen(true)}
-          />
-          <FormGroup row className={classes.checkboxes}>
-            <FormControl component="fieldset">
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={props.filter.popn}
-                      onChange={() =>
-                        props.setFilter(filter => ({
-                          ...filter,
-                          popn: !filter.popn
-                        }))
-                      }
-                      value="popn"
-                      color="primary"
-                    />
-                  }
-                  label="ポップン"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={props.filter.taiko}
-                      onChange={() =>
-                        props.setFilter(filter => ({
-                          ...filter,
-                          taiko: !filter.taiko
-                        }))
-                      }
-                      value="taiko"
-                      color="primary"
-                    />
-                  }
-                  label="太鼓の達人"
-                />
-              </FormGroup>
-            </FormControl>
-          </FormGroup>
+        <div className={classes.sideContainer}>
+          <div className={classes.searchArea}>
+            <SearchBar
+              onSearch={viewport => props.setViewport(viewport)}
+              onMenuButtonClick={() => setAboutSideOpen(true)}
+            />
+            <FormGroup row className={classes.checkboxes}>
+              <FormControl component="fieldset">
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={hasSomthingSelected}
+                        onChange={() => props.setFilter(intializeFilter(!hasSomthingSelected))}
+                        value="selectAll"
+                        color="primary"
+                      />
+                    }
+                    label={hasSomthingSelected ? "すべて解除" : "すべて選択"}
+                  />
+                  {Object.keys(NAME_MAP).map(gameName => <FilterCheckBox key={gameName} gameName={gameName} />)}
+                </FormGroup>
+              </FormControl>
+            </FormGroup>
+          </div>
+          <Divider />
+          {props.gameCenterData && <GameCenterInfo data={props.gameCenterData} />}
+          <AboutSide open={aboutSideOpen} onDrawerClose={() => setAboutSideOpen(false)} />
         </div>
-        <Divider />
-        {props.gameCenterData && <GameCenterInfo data={props.gameCenterData} />}
-        <AboutSide
-          open={aboutSideOpen}
-          onDrawerClose={() => setAboutSideOpen(false)}
-        />
       </Drawer>
     </div>
   );
