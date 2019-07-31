@@ -5,7 +5,9 @@ import fetch from "isomorphic-unfetch";
 import { Viewport } from "react-leaflet";
 import Snackbar from "@material-ui/core/Snackbar";
 import getConfig from "next/config";
+
 import { Filter, GameCenterGeoInfo, GameCenter } from "../types";
+import { intializeFilter } from "../constants/game";
 
 const { publicRuntimeConfig } = getConfig();
 const { API_URL } = publicRuntimeConfig;
@@ -32,10 +34,8 @@ function IndexPage(props: Prop) {
   const [gameCenterData, setGameCenterData] = useState(
     null as GameCenter | null
   );
-  const [filter, setFilter] = useState({
-    taiko: true,
-    popn: true
-  } as Filter);
+
+  const [filter, setFilter] = useState(intializeFilter(true));
 
   console.log(viewport.center, viewport.zoom);
 
@@ -147,7 +147,7 @@ function getVisibleGamecenters(
   return filtered;
 }
 
-IndexPage.getInitialProps = async function() {
+IndexPage.getInitialProps = async function () {
   console.log({ API_URL });
   const res = await fetch(`${API_URL}/gamecenters`);
   const data = await res.json();
