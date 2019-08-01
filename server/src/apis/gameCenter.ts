@@ -21,7 +21,12 @@ export const NAME_MAP = {
   sdvx: "SOUND VOLTEX",
   rb: "REFLEC BEAT",
   museca: "MUSECA",
-  danevo: "DanceEvolution"
+  danevo: "DanceEvolution",
+  maimai: "maimai",
+  wacca: "WACCA",
+  ongeki: "オンゲキ",
+  chuni: "チューニズム",
+  diva: "初音ミク Project DIVA Arcade Future Tone"
 };
 
 const gameCenterApi = (app: express.Express) => {
@@ -62,10 +67,7 @@ const gameCenterApi = (app: express.Express) => {
           id: 1,
           geo: 1,
           name: {
-            $arrayElemAt: [
-              { $map: { input: "$infos", as: "info", in: "$$info.text" } },
-              0
-            ]
+            $arrayElemAt: [{ $map: { input: "$infos", as: "info", in: "$$info.text" } }, 0]
           },
           games: 1
         }
