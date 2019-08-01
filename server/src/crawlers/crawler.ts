@@ -4,7 +4,7 @@ import jsdom from "jsdom";
 import cheerio from "cheerio";
 
 import { dbConnect } from "../utils/mongo";
-
+import sleep from "../utils/sleep";
 import GameCenterModel, { GameCenter, Info } from "../models/gameCenter";
 
 // TODO consider to remove getPaginatedUrls to simplify this class?
@@ -20,7 +20,7 @@ export default class Crawler {
   useCheerio: boolean;
 
   getPaginatedUrls: (url: string) => string[] | Promise<string[]>;
-  getList: (html: Document | CheerioStatic) => any[];
+  getList: (page: Document | CheerioStatic) => any[];
   getItem: (item: any) => GameCenter | Promise<GameCenter> | null;
 
   constructor({
@@ -54,9 +54,9 @@ export default class Crawler {
     this.updateTime = new Date();
   }
 
-  async crawlOnePage(url: string): Promise<GameCenter[]> {
-    const addAdditionInfo = (sourceId: string) => (item: Info) => ({ ...item, url, sourceId, updateTime: this.updateTime });
-    const htmlBuffer = await fetch(url, { headers: this.fetchHeaders }).then(res => res.arrayBuffer());
+  // fetch page with header and try to find the right encoding to decode
+  static async fetchPage(url: string, headers?: any): Promise<string> {
+    const htmlBuffer = await fetch(url, { headers }).then(res => res.arrayBuffer());
     const htmlUnit8Array = new Uint8Array(htmlBuffer);
     const unicodeArray = Encoding.convert(htmlUnit8Array, {
       to: "UNICODE",
@@ -66,13 +66,25 @@ export default class Crawler {
 
     // @ts-ignore we know unicodeArray is always number[]
     const htmlText = Encoding.codeToString(unicodeArray);
+    return htmlText;
+  }
+
+  async crawlOnePage(url: string): Promise<GameCenter[]> {
+    const addAdditionInfo = (sourceId: string) => (item: Info) => ({
+      ...item,
+      url,
+      sourceId,
+      updateTime: this.updateTime
+    });
 
     let items;
+    const html = await Crawler.fetchPage(url, this.fetchHeaders);
+
     if (!this.useCheerio) {
-      const { document } = new jsdom.JSDOM(htmlText).window;
+      const { document } = new jsdom.JSDOM(html).window;
       items = await Promise.all(this.getList(document).map(this.getItem));
     } else {
-      const $ = cheerio.load(htmlText);
+      const $ = cheerio.load(html);
       items = await Promise.all(this.getList($).map(item => this.getItem($(item))));
     }
 
@@ -111,7 +123,9 @@ export default class Crawler {
     // TODO remove all information from that source if there are results from same source (how to check?)
     for (let i = 0; i < flatResults.length; i++) {
       const gameCenterItem = flatResults[i];
-      let gameCenterEntity = await GameCenterModel.findOne({ id: gameCenterItem.id });
+      let gameCenterEntity = await GameCenterModel.findOne({
+        id: gameCenterItem.id
+      });
       if (!gameCenterEntity) {
         gameCenterEntity = new GameCenterModel({
           id: gameCenterItem.id,
@@ -147,8 +161,4 @@ export default class Crawler {
 
     db.close();
   }
-}
-
-function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }

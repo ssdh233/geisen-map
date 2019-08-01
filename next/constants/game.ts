@@ -15,7 +15,12 @@ export const NAME_MAP = {
   sdvx: "SOUND VOLTEX",
   rb: "REFLEC BEAT",
   museca: "MUSECA",
-  danevo: "DanceEvolution"
+  danevo: "DanceEvolution",
+  maimai: "maimai",
+  wacca: "WACCA",
+  ongeki: "オンゲキ",
+  chuni: "チューニズム",
+  diva: "初音ミク Project DIVA Arcade Future Tone"
 } as { [gameName: string]: string };
 
 export const intializeFilter = (flag: boolean): Filter => {
