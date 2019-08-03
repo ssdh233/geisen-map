@@ -3,10 +3,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import Drawer from "@material-ui/core/Drawer";
 import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
-import FormControl from "@material-ui/core/FormControl";
-import FormGroup from "@material-ui/core/FormGroup";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
 import Divider from "@material-ui/core/Divider";
 import { Viewport } from "react-leaflet";
 
@@ -14,7 +10,7 @@ import SearchBar from "./SearchBar";
 import GameCenterInfo from "./GameCenterInfo";
 import AboutSide from "./AboutSide";
 import { Filter, GameCenter } from "../types";
-import { NAME_MAP, intializeFilter } from "../constants/game";
+import GameFilter from "./GameFilter";
 
 const toggleStyle = {
   color: "rgba(0, 0, 0, 0.54)",
@@ -53,7 +49,7 @@ const useStyles = makeStyles({
   searchArea: {
     padding: 8,
     marginBottom: 8
-  },
+  }
 });
 
 interface Props {
@@ -70,26 +66,6 @@ function MainSide(props: Props) {
 
   const classes = useStyles();
 
-  const FilterCheckBox = ({ gameName }: { gameName: string }) => (
-    <FormControlLabel
-      control={
-        <Checkbox
-          checked={props.filter[gameName]}
-          onChange={() =>
-            props.setFilter(filter => ({
-              ...filter,
-              [gameName]: !filter[gameName]
-            }))
-          }
-          value={gameName}
-          color="primary"
-        />
-      }
-      label={NAME_MAP[gameName]}
-    />
-  );
-
-  const hasSomthingSelected = Object.keys(props.filter).some(gameName => props.filter[gameName]);
   return (
     <div style={{ border: "5px solid red" }}>
       {!open && (
@@ -117,24 +93,7 @@ function MainSide(props: Props) {
               onSearch={viewport => props.setViewport(viewport)}
               onMenuButtonClick={() => setAboutSideOpen(true)}
             />
-            <FormGroup row className={classes.checkboxes}>
-              <FormControl component="fieldset">
-                <FormGroup>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={hasSomthingSelected}
-                        onChange={() => props.setFilter(intializeFilter(!hasSomthingSelected))}
-                        value="selectAll"
-                        color="primary"
-                      />
-                    }
-                    label={hasSomthingSelected ? "すべて解除" : "すべて選択"}
-                  />
-                  {Object.keys(NAME_MAP).map(gameName => <FilterCheckBox key={gameName} gameName={gameName} />)}
-                </FormGroup>
-              </FormControl>
-            </FormGroup>
+            <GameFilter filter={props.filter} onChange={(newFilter) => props.setFilter(newFilter)} />
           </div>
           <Divider />
           {props.gameCenterData && <GameCenterInfo data={props.gameCenterData} />}
