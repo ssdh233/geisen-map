@@ -28,6 +28,7 @@ const useStyles = makeStyles({
     cursor: "pointer",
     fontSize: "1rem",
     display: "flex",
+    alignItems: "center",
     width: "100%",
     marginBottom: 8
   },
@@ -80,7 +81,7 @@ function GameFilter(props: Props) {
 
   return (
     <div className={classes.container}>
-      <button className={classes.expander} onClick={() => props.onChangeExpanded(!props.expanded)}>
+      <div className={classes.expander} onClick={() => props.onChangeExpanded(!props.expanded)}>
         <FilterListIcon className={classes.filterIcon} />
         <div className={classes.label}>機種絞り込み</div>
         <div className={classes.expandIconContainer}>
@@ -88,7 +89,7 @@ function GameFilter(props: Props) {
             <ExpandMoreIcon className={cx(classes.expandIcon, props.expanded && classes.expandIconRotated)} />
           </IconButton>
         </div>
-      </button>
+      </div>
       {props.expanded && <FormGroup row>
         <FormControl component="fieldset">
           <FormGroup>
