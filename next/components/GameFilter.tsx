@@ -42,7 +42,8 @@ const useStyles = makeStyles({
     width: 48,
     height: 24,
     display: "flex",
-    alignItems: "center"
+    alignItems: "center",
+    position: "relative"
   },
   expandIconButton: {
     position: "absolute"

@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import { GameCenter } from "../types";
 
-interface Prop {
+type Prop = {
   data: GameCenter;
 }
 

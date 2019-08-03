@@ -35,12 +35,12 @@ const useStyles = makeStyles({
   }
 });
 
-interface Props {
+type Props = {
   onSearch: (viewport: reactLeaflet.Viewport) => void;
   onMenuButtonClick: () => void;
 }
 
-interface Suggestion {
+type Suggestion = {
   text: string;
   geo: Geo;
   type: string; // TODO enum

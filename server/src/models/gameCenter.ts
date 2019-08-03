@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-export interface Info {
+export type Info = {
   infoType: string; // Enum?
   text: string;
   sourceId?: string;
@@ -16,7 +16,7 @@ const Info = {
   updateTime: Date
 };
 
-export interface GameCenter {
+export type GameCenter = {
   id: string;
   geo: { lat: number; lng: number };
   infos: Info[];

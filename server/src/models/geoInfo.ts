@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-export interface GeoInfo {
+export type GeoInfo = {
   geo: { lat: number, lng: number },
   text: string,
   alts: string[],

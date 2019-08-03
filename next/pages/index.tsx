@@ -4,6 +4,7 @@ import Head from "next/head";
 import fetch from "isomorphic-unfetch";
 import { Viewport } from "react-leaflet";
 import Snackbar from "@material-ui/core/Snackbar";
+import Button from '@material-ui/core/Button';
 import getConfig from "next/config";
 
 import { Filter, GameCenterGeoInfo, GameCenter } from "../types";
@@ -20,7 +21,7 @@ const Map = dynamic(() => import("../components/Map"), {
   ssr: false
 });
 
-interface Prop {
+type Prop = {
   gamecenters: GameCenterGeoInfo[];
 }
 
@@ -37,6 +38,8 @@ function IndexPage(props: Prop) {
 
   const [filter, setFilter] = useState(intializeFilter(true));
   const [filterExpanded, setFilterExpanded] = useState(true);
+
+  const [snackBarOpen, setSnackBarOpen] = useState(true);
 
   console.log(viewport.center, viewport.zoom);
 
@@ -56,6 +59,8 @@ function IndexPage(props: Prop) {
   }, [gameCenterId]);
 
   console.log("rendered marks:", gamecenters.length);
+
+  const hasMoreThanOneFilter = Object.keys(filter).map(key => filter[key]).filter(isTrue => isTrue).length > 1;
   return (
     <div>
       <Head>
@@ -112,6 +117,15 @@ function IndexPage(props: Prop) {
         }}
         open={Boolean(viewport.zoom && viewport.zoom < 10)}
         message={<span>ズームインしてゲームセンターの情報を表示する</span>}
+      />
+      <Snackbar
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center"
+        }}
+        open={Boolean(viewport.zoom && viewport.zoom >= 10) && hasMoreThanOneFilter && snackBarOpen}
+        message={<span>複数の機種で検索する際、同じゲーセンが違う場所で表示されることがありますのでご了承ください（近い内に改善する予定です）</span>}
+        action={[<Button color="secondary" size="small" onClick={() => setSnackBarOpen(false)}>閉じる</Button>]}
       />
     </div>
   );
