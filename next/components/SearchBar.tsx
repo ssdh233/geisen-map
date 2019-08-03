@@ -20,7 +20,6 @@ const useStyles = makeStyles({
     padding: "2px 4px",
     display: "flex",
     alignItems: "center",
-    width: 400,
     marginBottom: 8
   },
   input: {
@@ -33,7 +32,6 @@ const useStyles = makeStyles({
   paper: {
     position: "absolute",
     zIndex: 1,
-    width: 400
   }
 });
 

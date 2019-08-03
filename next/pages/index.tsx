@@ -36,6 +36,7 @@ function IndexPage(props: Prop) {
   );
 
   const [filter, setFilter] = useState(intializeFilter(true));
+  const [filterExpanded, setFilterExpanded] = useState(true);
 
   console.log(viewport.center, viewport.zoom);
 
@@ -90,13 +91,18 @@ function IndexPage(props: Prop) {
         viewport={viewport}
         onChangeViewport={viewport => setViewport(viewport)}
         gamecenters={gamecenters}
-        onMarkerClick={id => setGameCenterId(id)}
+        onMarkerClick={id => {
+          setGameCenterId(id);
+          setFilterExpanded(false);
+        }}
       />
       <MainSide
         gameCenterId={gameCenterId}
         gameCenterData={gameCenterData}
         filter={filter}
         setFilter={setFilter}
+        filterExpanded={filterExpanded}
+        setFilterExpanded={setFilterExpanded}
         setViewport={setViewport}
       />
       <Snackbar

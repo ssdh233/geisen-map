@@ -41,22 +41,21 @@ const useStyles = makeStyles({
   },
   sideContainer: {
     height: "100%",
-    overflow: "auto"
+    overflow: "auto",
+    width: 400,
   },
-  checkboxes: {
-    paddingLeft: 16
-  },
-  searchArea: {
-    padding: 8,
-    marginBottom: 8
+  searchBarContainer: {
+    padding: 8
   }
 });
 
-interface Props {
+type Props = {
   gameCenterId: string;
   gameCenterData: GameCenter | null;
   filter: Filter;
   setFilter: Dispatch<SetStateAction<Filter>>;
+  filterExpanded: boolean;
+  setFilterExpanded: Dispatch<SetStateAction<boolean>>;
   setViewport: Dispatch<SetStateAction<Viewport>>;
 }
 
@@ -88,13 +87,13 @@ function MainSide(props: Props) {
           <ArrowLeftIcon />
         </button>
         <div className={classes.sideContainer}>
-          <div className={classes.searchArea}>
+          <div className={classes.searchBarContainer}>
             <SearchBar
               onSearch={viewport => props.setViewport(viewport)}
               onMenuButtonClick={() => setAboutSideOpen(true)}
             />
-            <GameFilter filter={props.filter} onChange={(newFilter) => props.setFilter(newFilter)} />
           </div>
+          <GameFilter expanded={props.filterExpanded} onChangeExpanded={props.setFilterExpanded} filter={props.filter} onChange={props.setFilter} />
           <Divider />
           {props.gameCenterData && <GameCenterInfo data={props.gameCenterData} />}
           <AboutSide open={aboutSideOpen} onDrawerClose={() => setAboutSideOpen(false)} />
