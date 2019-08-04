@@ -1,148 +1,164 @@
 import fetch from "node-fetch";
-import mongoose from "mongoose";
 import Encoding from "encoding-japanese";
 import jsdom from "jsdom";
+import cheerio from "cheerio";
 
-import gameCenterSchema from "../schemas/gameCenter";
+import { dbConnect } from "../utils/mongo";
+import sleep from "../utils/sleep";
+import GameCenterModel, { GameCenter, Info } from "../models/gameCenter";
 
-interface RawInfo {
-  infoType: string; // TODO enum
-  text: string;
-  sourceId?: String;
-  url?: String;
-  updateTime?: Date;
-}
-
-interface RawGameCenter {
-  id: string;
-  geo: { lat: number; lng: number };
-  infos: RawInfo[];
-  games: { name: string; infos: RawInfo[] }[]; // TODO name: enum
-}
-
+// TODO consider to remove getPaginatedUrls to simplify this class?
 export default class Crawler {
   sourceId: string;
+  // For web site like bemani eagate, we have to crawl it multiple times for different games.
+  // We don't want to duplicate game center infos in database, so we will set the same sourceId for all these "bemani crawlers",
+  // but set different gameSourceId for "iidx bemani crawler" and "ddr bemani crawler"
+  gameSourceId: string;
   updateTime: Date;
   urls: string[];
+  fetchHeaders: any;
+  useCheerio: boolean;
 
   getPaginatedUrls: (url: string) => string[] | Promise<string[]>;
-  getList: (html: any) => any[];
-  getItem: (item: any) => RawGameCenter | Promise<RawGameCenter> | null;
+  getList: (page: Document | CheerioStatic) => any[];
+  getItem: (item: any) => GameCenter | Promise<GameCenter> | null;
 
   constructor({
     sourceId,
+    gameSourceId,
     urls,
     getPaginatedUrls = url => [url],
     getList,
-    getItem
+    getItem,
+    useCheerio = false,
+    fetchHeaders = {}
   }: {
     sourceId: string;
+    gameSourceId?: string;
     urls: string[];
     getPaginatedUrls?: (url: string) => string[] | Promise<string[]>;
-    getList: (html: any) => any[];
-    getItem: (item: any) => RawGameCenter | Promise<RawGameCenter>;
+    getList: (html: Document | CheerioStatic) => any[];
+    getItem: (item: any) => GameCenter | Promise<GameCenter>;
+    useCheerio?: boolean;
+    fetchHeaders?: any;
   }) {
+    this.sourceId = sourceId;
+    this.gameSourceId = gameSourceId || sourceId;
     this.urls = urls;
     this.getPaginatedUrls = getPaginatedUrls;
     this.getList = getList;
     this.getItem = getItem;
+    this.useCheerio = useCheerio;
+    this.fetchHeaders = fetchHeaders;
 
-    this.sourceId = sourceId;
     this.updateTime = new Date();
   }
 
-  async crawlOnePage(url: string): Promise<RawGameCenter[]> {
-    const addAdditionInfo = (item: RawInfo) => ({ ...item, url, sourceId: this.sourceId, updateTime: this.updateTime });
-    const htmlBuffer = await fetch(url).then(res => res.arrayBuffer());
+  // fetch page with header and try to find the right encoding to decode
+  static async fetchPage(url: string, headers?: any): Promise<string> {
+    const htmlBuffer = await fetch(url, { headers }).then(res => res.arrayBuffer());
     const htmlUnit8Array = new Uint8Array(htmlBuffer);
     const unicodeArray = Encoding.convert(htmlUnit8Array, {
       to: "UNICODE",
-      from: Encoding.detect(htmlUnit8Array)
+      from: Encoding.detect(htmlUnit8Array),
+      type: "array"
     });
-    // @ts-ignore
-    const htmlText = Encoding.codeToString(unicodeArray);
-    const { document } = new jsdom.JSDOM(htmlText).window;
 
-    const items = await Promise.all(this.getList(document).map(this.getItem));
+    // @ts-ignore we know unicodeArray is always number[]
+    const htmlText = Encoding.codeToString(unicodeArray);
+    return htmlText;
+  }
+
+  async crawlOnePage(url: string): Promise<GameCenter[]> {
+    const addAdditionInfo = (sourceId: string) => (item: Info) => ({
+      ...item,
+      url,
+      sourceId,
+      updateTime: this.updateTime
+    });
+
+    let items;
+    const html = await Crawler.fetchPage(url, this.fetchHeaders);
+
+    if (!this.useCheerio) {
+      const { document } = new jsdom.JSDOM(html).window;
+      items = await Promise.all(this.getList(document).map(this.getItem));
+    } else {
+      const $ = cheerio.load(html);
+      items = await Promise.all(this.getList($).map(item => this.getItem($(item))));
+    }
 
     console.log("crawling:", url, "results:", items.length);
     return items
       .filter(x => x)
       .map(gameCenterItem => ({
         ...gameCenterItem,
-        infos: gameCenterItem.infos.map(addAdditionInfo),
+        infos: gameCenterItem.infos.map(addAdditionInfo(this.sourceId)),
         games: gameCenterItem.games.map(gameItem => ({
           ...gameItem,
-          infos: gameItem.infos.map(addAdditionInfo)
+          infos: gameItem.infos.map(addAdditionInfo(this.gameSourceId))
         }))
       }));
   }
 
   async start() {
+    const db = dbConnect();
+
     const that = this;
     const paginatedUrls = await Promise.all(this.urls.map(this.getPaginatedUrls));
     this.urls = [].concat(...paginatedUrls);
 
+    this.urls.forEach(url => console.log("target urls:", url));
+
     const promises = [];
     for (let i = 0; i < this.urls.length; i++) {
       promises.push(this.crawlOnePage(this.urls[i]));
-      await sleep(10);
+      await sleep(3);
     }
     const results = await Promise.all(promises);
-    const flatResults = ([] as RawGameCenter[]).concat(...results);
+    const flatResults = ([] as GameCenter[]).concat(...results);
 
-    console.log(flatResults.length);
+    console.log("flatResults.length:", flatResults.length);
 
-    // TODO move this logic to somewhere
-    mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
-    const db = mongoose.connection;
-    db.on("error", console.error.bind(console, "connection error:"));
-    db.once("open", async function() {
-      // TODO clear this part
-      const GameCenter = mongoose.model<RawGameCenter & mongoose.Document>("gameCenter", gameCenterSchema);
-
-      // TODO remove all information from that source if there are results (how to check?)
-
-      for (let i = 0; i < flatResults.length; i++) {
-        const gameCenterItem = flatResults[i];
-        let gameCenterEntity = await GameCenter.findOne({ id: gameCenterItem.id });
-        if (!gameCenterEntity) {
-          gameCenterEntity = new GameCenter({
-            id: gameCenterItem.id,
-            geo: gameCenterItem.geo,
-            infos: [],
-            games: []
-          });
-        }
-
-        // TODO try to move this part to schema?
-        // clear previous info from this source
-        gameCenterEntity.infos = gameCenterEntity.infos.filter(info => info.sourceId !== that.sourceId);
-        // add new info
-        gameCenterEntity.infos = [...gameCenterEntity.infos, ...gameCenterItem.infos];
-        gameCenterItem.games.forEach(gameItem => {
-          let currentGame;
-          let index = gameCenterEntity.games.findIndex(x => x.name === gameItem.name);
-          if (index >= 0) {
-            const currentGameInfos = gameCenterEntity.games[index].infos;
-            gameCenterEntity.games[index].infos = gameCenterEntity.games[index].infos.filter(
-              info => info.sourceId !== that.sourceId
-            );
-            gameCenterEntity.games[index].infos = [...currentGameInfos, ...gameItem.infos];
-          } else {
-            currentGame = { name: gameItem.name, infos: gameItem.infos };
-            gameCenterEntity.games.push(currentGame);
-          }
+    // TODO remove all information from that source if there are results from same source (how to check?)
+    for (let i = 0; i < flatResults.length; i++) {
+      const gameCenterItem = flatResults[i];
+      let gameCenterEntity = await GameCenterModel.findOne({
+        id: gameCenterItem.id
+      });
+      if (!gameCenterEntity) {
+        gameCenterEntity = new GameCenterModel({
+          id: gameCenterItem.id,
+          geo: gameCenterItem.geo,
+          infos: [],
+          games: []
         });
-
-        await gameCenterEntity.save();
-        console.log(`Saved ${i} Items`);
       }
-      db.close();
-    });
-  }
-}
 
-function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+      // TODO try to move this part to schema?
+      // clear previous info from this source
+      gameCenterEntity.infos = gameCenterEntity.infos.filter(info => info.sourceId !== that.sourceId);
+      // add new info
+      gameCenterEntity.infos = [...gameCenterEntity.infos, ...gameCenterItem.infos];
+      gameCenterItem.games.forEach(gameItem => {
+        let currentGame;
+        let index = gameCenterEntity.games.findIndex(x => x.name === gameItem.name);
+        if (index >= 0) {
+          const currentGameInfos = gameCenterEntity.games[index].infos;
+          gameCenterEntity.games[index].infos = gameCenterEntity.games[index].infos.filter(
+            info => info.sourceId !== that.gameSourceId
+          );
+          gameCenterEntity.games[index].infos = [...currentGameInfos, ...gameItem.infos];
+        } else {
+          currentGame = { name: gameItem.name, infos: gameItem.infos };
+          gameCenterEntity.games.push(currentGame);
+        }
+      });
+
+      await gameCenterEntity.save();
+      console.log(`Saved ${i} Items`);
+    }
+
+    db.close();
+  }
 }

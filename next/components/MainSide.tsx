@@ -1,17 +1,16 @@
-import { useState } from "react";
-import { makeStyles } from '@material-ui/core/styles';
-import Drawer from '@material-ui/core/Drawer';
-import ArrowLeftIcon from '@material-ui/icons/ArrowLeft';
-import ArrowRightIcon from '@material-ui/icons/ArrowRight';
-import FormControl from '@material-ui/core/FormControl';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import Divider from '@material-ui/core/Divider';
+import { useState, Dispatch, SetStateAction } from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import Drawer from "@material-ui/core/Drawer";
+import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
+import ArrowRightIcon from "@material-ui/icons/ArrowRight";
+import Divider from "@material-ui/core/Divider";
+import { Viewport } from "react-leaflet";
 
 import SearchBar from "./SearchBar";
 import GameCenterInfo from "./GameCenterInfo";
 import AboutSide from "./AboutSide";
+import { Filter, GameCenter } from "../types";
+import GameFilter from "./GameFilter";
 
 const toggleStyle = {
   color: "rgba(0, 0, 0, 0.54)",
@@ -23,13 +22,9 @@ const toggleStyle = {
   boxShadow: "2px 0px 4px rgba(0, 0, 0, 0.3)",
   display: "flex",
   justifyContent: "center"
-}
+};
 
 const useStyles = makeStyles({
-  searchArea: {
-    padding: 8,
-    marginBottom: 8
-  },
   closeButton: {
     ...toggleStyle,
     position: "absolute",
@@ -42,19 +37,26 @@ const useStyles = makeStyles({
     position: "absolute",
     zIndex: 1000,
     left: 0,
-    top: 8,
+    top: 8
   },
-  checkboxes: {
-    paddingLeft: 16
+  sideContainer: {
+    height: "100%",
+    overflow: "auto",
+    width: 400,
+  },
+  searchBarContainer: {
+    padding: 8
   }
 });
 
-interface Props {
+type Props = {
   gameCenterId: string;
-  gameCenterData: any,
-  filter: any,
-  setFilter: any,
-  setViewport: any
+  gameCenterData: GameCenter | null;
+  filter: Filter;
+  setFilter: Dispatch<SetStateAction<Filter>>;
+  filterExpanded: boolean;
+  setFilterExpanded: Dispatch<SetStateAction<boolean>>;
+  setViewport: Dispatch<SetStateAction<Viewport>>;
 }
 
 function MainSide(props: Props) {
@@ -65,44 +67,37 @@ function MainSide(props: Props) {
 
   return (
     <div style={{ border: "5px solid red" }}>
-      {!open && <button className={classes.openButton} onClick={() => setOpen(true)}><ArrowRightIcon /></button>}
-      <Drawer anchor="left" open={open} variant="persistent" PaperProps={{
-        style: {
-          overflowY: 'visible',
-          boxShadow: "0 0 20px rgba(0, 0, 0, 0.3)"
-        }
-      }}>
-        <button className={classes.closeButton} onClick={() => setOpen(false)}><ArrowLeftIcon /></button>
-        <div className={classes.searchArea}>
-          <SearchBar setViewport={props.setViewport} setAboutSideOpen={setAboutSideOpen} />
-          <FormGroup row className={classes.checkboxes}>
-            <FormControl component="fieldset">
-              <FormGroup>
-                <FormControlLabel
-                  control={<Checkbox
-                    checked={props.filter.popn}
-                    onChange={() => props.setFilter((filter: any) => ({ ...filter, popn: !filter.popn }))}
-                    value="popn"
-                    color="primary" />
-                  }
-                  label="ポップン"
-                />
-                <FormControlLabel
-                  control={<Checkbox
-                    checked={props.filter.taiko}
-                    onChange={() => props.setFilter((filter: any) => ({ ...filter, taiko: !filter.taiko }))}
-                    value="taiko"
-                    color="primary" />
-                  }
-                  label="太鼓の達人"
-                />
-              </FormGroup>
-            </FormControl>
-          </FormGroup>
+      {!open && (
+        <button className={classes.openButton} onClick={() => setOpen(true)}>
+          <ArrowRightIcon />
+        </button>
+      )}
+      <Drawer
+        anchor="left"
+        open={open}
+        variant="persistent"
+        PaperProps={{
+          style: {
+            overflowY: "visible",
+            boxShadow: "0 0 20px rgba(0, 0, 0, 0.3)"
+          }
+        }}
+      >
+        <button className={classes.closeButton} onClick={() => setOpen(false)}>
+          <ArrowLeftIcon />
+        </button>
+        <div className={classes.sideContainer}>
+          <div className={classes.searchBarContainer}>
+            <SearchBar
+              onSearch={viewport => props.setViewport(viewport)}
+              onMenuButtonClick={() => setAboutSideOpen(true)}
+            />
+          </div>
+          <GameFilter expanded={props.filterExpanded} onChangeExpanded={props.setFilterExpanded} filter={props.filter} onChange={props.setFilter} />
+          <Divider />
+          {props.gameCenterData && <GameCenterInfo data={props.gameCenterData} />}
+          <AboutSide open={aboutSideOpen} onDrawerClose={() => setAboutSideOpen(false)} />
         </div>
-        <Divider />
-        <GameCenterInfo data={props.gameCenterData} />
-        <AboutSide open={aboutSideOpen} setAboutSideOpen={setAboutSideOpen} />
       </Drawer>
     </div>
   );

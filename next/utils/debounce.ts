@@ -1,12 +1,10 @@
-export default function debounce(func: any, delay: number) {
-  // @ts-ignore
-  let inDebounce;
+// TODO unit test (test point: this)
+export default function debounce(func: Function, delay: number) {
+  let inDebounce: number; // timeoutID
   return function() {
-    // @ts-ignore
-    const context = this;
     const args = arguments;
-    // @ts-ignore
     clearTimeout(inDebounce);
-    inDebounce = setTimeout(() => func.apply(context, args), delay);
+    // @ts-ignore
+    inDebounce = setTimeout(() => func.apply(this, args), delay);
   };
 }
