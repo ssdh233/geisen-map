@@ -31,7 +31,7 @@ const useStyles = makeStyles({
   }
 });
 
-interface Props {
+type Props = {
   viewport: Viewport;
   onChangeViewport: (viewport: Viewport) => void;
   onMarkerClick: (gameCenterId: string) => void;
@@ -66,7 +66,7 @@ function MyMap(props: Props) {
       timeout: 10 * 1000
     };
 
-    let geoSuccess = function(position: {
+    let geoSuccess = function (position: {
       coords: { latitude: number; longitude: number };
     }) {
       startPos = position;
@@ -76,7 +76,7 @@ function MyMap(props: Props) {
       });
       setUserLocation([startPos.coords.latitude, startPos.coords.longitude]);
     };
-    let geoError = function(error: { code: number }) {
+    let geoError = function (error: { code: number }) {
       console.log("Error occurred. Error code: " + error.code);
       // error.code can be:
       //   0: unknown error

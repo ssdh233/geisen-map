@@ -1,4 +1,4 @@
-interface Geo {
+type Geo = {
   lat: number;
   lng: number;
 }

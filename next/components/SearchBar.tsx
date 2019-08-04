@@ -20,7 +20,6 @@ const useStyles = makeStyles({
     padding: "2px 4px",
     display: "flex",
     alignItems: "center",
-    width: 400,
     marginBottom: 8
   },
   input: {
@@ -33,16 +32,15 @@ const useStyles = makeStyles({
   paper: {
     position: "absolute",
     zIndex: 1,
-    width: 400
   }
 });
 
-interface Props {
+type Props = {
   onSearch: (viewport: reactLeaflet.Viewport) => void;
   onMenuButtonClick: () => void;
 }
 
-interface Suggestion {
+type Suggestion = {
   text: string;
   geo: Geo;
   type: string; // TODO enum
