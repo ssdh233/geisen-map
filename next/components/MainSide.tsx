@@ -5,12 +5,15 @@ import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import Divider from "@material-ui/core/Divider";
 import { Viewport } from "react-leaflet";
+import useMediaQuery from "@material-ui/core/useMediaQuery";
 
+import MyDrawer, { DrawerState } from "./MyDrawer";
 import SearchBar from "./SearchBar";
 import GameCenterInfo from "./GameCenterInfo";
 import AboutSide from "./AboutSide";
 import { Filter, GameCenter } from "../types";
 import GameFilter from "./GameFilter";
+import cx from "../utils/classname";
 
 const toggleStyle = {
   color: "rgba(0, 0, 0, 0.54)",
@@ -42,10 +45,26 @@ const useStyles = makeStyles({
   sideContainer: {
     height: "100%",
     overflow: "auto",
-    width: 400,
+    width: 400
   },
   searchBarContainer: {
     padding: 8
+  },
+  // sp styles
+  "@media (max-width: 768px)": {
+    sideContainer: {
+      width: "100%"
+    }
+  },
+  spContainer: {
+    zIndex: 1200,
+    width: "100%",
+    position: "fixed"
+  },
+  spFilterDrawerOpen: {},
+  spFilterDrawerClose: {
+    height: 48,
+    overflowY: "hidden"
   }
 });
 
@@ -57,49 +76,98 @@ type Props = {
   filterExpanded: boolean;
   setFilterExpanded: Dispatch<SetStateAction<boolean>>;
   setViewport: Dispatch<SetStateAction<Viewport>>;
-}
+  spGameCenterInfoDrawerState: DrawerState;
+  onChangeSpGameCenterInfoDrawerState: (drawerState: DrawerState) => void;
+};
 
 function MainSide(props: Props) {
-  const [open, setOpen] = useState(true);
+  const [pcDrawerOpen, setPcDrawerOpen] = useState(true);
+  const [spFilterOpen, setSpFilterOpen] = useState(false);
   const [aboutSideOpen, setAboutSideOpen] = useState(false);
 
   const classes = useStyles();
+  const isSP = useMediaQuery("(max-width: 768px)");
 
   return (
-    <div style={{ border: "5px solid red" }}>
-      {!open && (
-        <button className={classes.openButton} onClick={() => setOpen(true)}>
-          <ArrowRightIcon />
-        </button>
+    <>
+      {!isSP && (
+        <div>
+          {!open && (
+            <button className={classes.openButton} onClick={() => setPcDrawerOpen(true)}>
+              <ArrowRightIcon />
+            </button>
+          )}
+          <Drawer
+            anchor="left"
+            open={pcDrawerOpen}
+            variant="persistent"
+            PaperProps={{
+              style: {
+                overflowY: "visible",
+                boxShadow: "0 0 20px rgba(0, 0, 0, 0.3)"
+              }
+            }}
+          >
+            <button className={classes.closeButton} onClick={() => setPcDrawerOpen(false)}>
+              <ArrowLeftIcon />
+            </button>
+            <div className={classes.sideContainer}>
+              <div className={classes.searchBarContainer}>
+                <SearchBar
+                  onSearch={viewport => props.setViewport(viewport)}
+                  onMenuButtonClick={() => setAboutSideOpen(true)}
+                />
+              </div>
+              <GameFilter
+                expanded={props.filterExpanded}
+                onChangeExpanded={props.setFilterExpanded}
+                filter={props.filter}
+                onChange={props.setFilter}
+              />
+              <Divider />
+              {props.gameCenterData && <GameCenterInfo data={props.gameCenterData} />}
+              <AboutSide open={aboutSideOpen} onDrawerClose={() => setAboutSideOpen(false)} />
+            </div>
+          </Drawer>
+        </div>
       )}
-      <Drawer
-        anchor="left"
-        open={open}
-        variant="persistent"
-        PaperProps={{
-          style: {
-            overflowY: "visible",
-            boxShadow: "0 0 20px rgba(0, 0, 0, 0.3)"
-          }
-        }}
-      >
-        <button className={classes.closeButton} onClick={() => setOpen(false)}>
-          <ArrowLeftIcon />
-        </button>
-        <div className={classes.sideContainer}>
+      {isSP && (
+        <div className={classes.spContainer}>
           <div className={classes.searchBarContainer}>
             <SearchBar
               onSearch={viewport => props.setViewport(viewport)}
               onMenuButtonClick={() => setAboutSideOpen(true)}
             />
+            <AboutSide open={aboutSideOpen} onDrawerClose={() => setAboutSideOpen(false)} />
           </div>
-          <GameFilter expanded={props.filterExpanded} onChangeExpanded={props.setFilterExpanded} filter={props.filter} onChange={props.setFilter} />
-          <Divider />
-          {props.gameCenterData && <GameCenterInfo data={props.gameCenterData} />}
-          <AboutSide open={aboutSideOpen} onDrawerClose={() => setAboutSideOpen(false)} />
+          {/* TODO: make it swipeable */}
+          <Drawer
+            variant="permanent"
+            anchor="bottom"
+            open={spFilterOpen}
+            classes={{ paper: cx(spFilterOpen ? classes.spFilterDrawerOpen : classes.spFilterDrawerClose) }}
+          >
+            <GameFilter
+              expanded={true}
+              onChangeExpanded={() => {
+                setSpFilterOpen(!spFilterOpen);
+              }}
+              filter={props.filter}
+              onChange={props.setFilter}
+              expandedIconState={!spFilterOpen}
+            />
+          </Drawer>
+          {props.gameCenterData && (
+            <MyDrawer
+              drawerState={props.spGameCenterInfoDrawerState}
+              onChangeDrawerState={props.onChangeSpGameCenterInfoDrawerState}
+            >
+              <GameCenterInfo data={props.gameCenterData} />
+            </MyDrawer>
+          )}
         </div>
-      </Drawer>
-    </div>
+      )}
+    </>
   );
 }
 

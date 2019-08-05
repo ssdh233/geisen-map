@@ -4,9 +4,10 @@ import Head from "next/head";
 import fetch from "isomorphic-unfetch";
 import { Viewport } from "react-leaflet";
 import Snackbar from "@material-ui/core/Snackbar";
-import Button from '@material-ui/core/Button';
+import Button from "@material-ui/core/Button";
 import getConfig from "next/config";
 
+import { DrawerState } from "../components/MyDrawer";
 import { Filter, GameCenterGeoInfo, GameCenter } from "../types";
 import { intializeFilter } from "../constants/game";
 
@@ -23,7 +24,7 @@ const Map = dynamic(() => import("../components/Map"), {
 
 type Prop = {
   gamecenters: GameCenterGeoInfo[];
-}
+};
 
 function IndexPage(props: Prop) {
   const [viewport, setViewport] = useState({
@@ -32,16 +33,15 @@ function IndexPage(props: Prop) {
   } as Viewport);
 
   const [gameCenterId, setGameCenterId] = useState("");
-  const [gameCenterData, setGameCenterData] = useState(
-    null as GameCenter | null
-  );
+  const [gameCenterData, setGameCenterData] = useState(null as GameCenter | null);
+  const [spGameCenterInfoDrawerState, setSpGameCenterInfoDrawerState] = useState("closed" as DrawerState);
 
   const [filter, setFilter] = useState(intializeFilter(true));
   const [filterExpanded, setFilterExpanded] = useState(true);
 
   const [snackBarOpen, setSnackBarOpen] = useState(true);
 
-  console.log(viewport.center, viewport.zoom);
+  console.log(viewport.center, viewport.zoom, spGameCenterInfoDrawerState);
 
   const filteredGamecenters = filterGamecenters(props.gamecenters, filter);
   const gamecenters = getVisibleGamecenters(filteredGamecenters, viewport);
@@ -60,14 +60,14 @@ function IndexPage(props: Prop) {
 
   console.log("rendered marks:", gamecenters.length);
 
-  const hasMoreThanOneFilter = Object.keys(filter).map(key => filter[key]).filter(isTrue => isTrue).length > 1;
+  const hasMoreThanOneFilter =
+    Object.keys(filter)
+      .map(key => filter[key])
+      .filter(isTrue => isTrue).length > 1;
   return (
     <div>
       <Head>
-        <link
-          rel="stylesheet"
-          href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css"
-        />
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" />
       </Head>
       <style jsx global>
         {`
@@ -97,13 +97,20 @@ function IndexPage(props: Prop) {
         onChangeViewport={viewport => setViewport(viewport)}
         gamecenters={gamecenters}
         onMarkerClick={id => {
+          console.log("onMarkerClick", id);
           setGameCenterId(id);
           setFilterExpanded(false);
+          setSpGameCenterInfoDrawerState("halfOpen");
         }}
       />
       <MainSide
         gameCenterId={gameCenterId}
         gameCenterData={gameCenterData}
+        spGameCenterInfoDrawerState={spGameCenterInfoDrawerState}
+        onChangeSpGameCenterInfoDrawerState={drawerState => {
+          console.log("onChangeSpGameCenterInfoDrawerState", drawerState);
+          setSpGameCenterInfoDrawerState(drawerState);
+        }}
         filter={filter}
         setFilter={setFilter}
         filterExpanded={filterExpanded}
@@ -124,26 +131,28 @@ function IndexPage(props: Prop) {
           horizontal: "center"
         }}
         open={Boolean(viewport.zoom && viewport.zoom >= 10) && hasMoreThanOneFilter && snackBarOpen}
-        message={<span>複数の機種で検索する際、同じゲーセンが違う場所で表示されることがありますのでご了承ください（近い内に改善する予定です）</span>}
-        action={[<Button color="secondary" size="small" onClick={() => setSnackBarOpen(false)}>閉じる</Button>]}
+        message={
+          <span>
+            複数の機種で検索する際、同じゲーセンが違う場所で表示されることがありますのでご了承ください（近い内に改善する予定です）
+          </span>
+        }
+        action={[
+          <Button color="secondary" size="small" onClick={() => setSnackBarOpen(false)}>
+            閉じる
+          </Button>
+        ]}
       />
     </div>
   );
 }
 
-function filterGamecenters(
-  gamecenters: GameCenterGeoInfo[],
-  filter: Filter
-): GameCenterGeoInfo[] {
+function filterGamecenters(gamecenters: GameCenterGeoInfo[], filter: Filter): GameCenterGeoInfo[] {
   return gamecenters.filter(gamecenter => {
     return gamecenter.games.some(game => filter[game]);
   });
 }
 
-function getVisibleGamecenters(
-  gamecenters: GameCenterGeoInfo[],
-  viewport: Viewport
-): GameCenterGeoInfo[] {
+function getVisibleGamecenters(gamecenters: GameCenterGeoInfo[], viewport: Viewport): GameCenterGeoInfo[] {
   if (!viewport.center || !viewport.zoom) return [];
   if (viewport.zoom && viewport.zoom < 10) return [];
   const [lat, lng] = viewport.center;
@@ -155,9 +164,7 @@ function getVisibleGamecenters(
 
   while (filtered.length > 300) {
     filtered = gamecenters.filter(({ geo }) => {
-      return (
-        Math.abs(geo.lat - lat) < latRange && Math.abs(geo.lng - lng) < lngRnage
-      );
+      return Math.abs(geo.lat - lat) < latRange && Math.abs(geo.lng - lng) < lngRnage;
     });
 
     latRange /= 2;
@@ -167,7 +174,7 @@ function getVisibleGamecenters(
   return filtered;
 }
 
-IndexPage.getInitialProps = async function () {
+IndexPage.getInitialProps = async function() {
   console.log({ API_URL });
   const res = await fetch(`${API_URL}/gamecenters`);
   const data = await res.json();
