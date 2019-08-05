@@ -9,13 +9,13 @@ type Prop = {
 };
 
 const useStyles = makeStyles({
-  gameCenterInfo: (isSP: boolean) => ({
+  gameCenterInfo: ({ isSP }: { isSP: boolean }) => ({
     padding: "16px 24px",
     width: isSP ? "100%" : 400
   }),
-  name: (isSP: boolean) => ({
-    // left/right margin to make sure it's not covering the close button
-    margin: "0 30px 20px",
+  name: ({ isSP }: { isSP: boolean }) => ({
+    // left/right margin to make sure it's not covering the close button on SP
+    margin: isSP ? "0 30px 20px" : "0 0 20px",
     textAlign: isSP ? "center" : "left"
   })
 });
@@ -25,7 +25,7 @@ function GameCenterInfo(props: Prop) {
 
   const isSP = useMediaQuery("(max-width: 768px)");
   const { name, infos, games } = props.data;
-  const classes = useStyles(isSP);
+  const classes = useStyles({ isSP });
 
   return (
     <div className={classes.gameCenterInfo}>

@@ -6,6 +6,7 @@ import { Viewport } from "react-leaflet";
 import Snackbar from "@material-ui/core/Snackbar";
 import Button from "@material-ui/core/Button";
 import getConfig from "next/config";
+import useMediaQuery from "@material-ui/core/useMediaQuery";
 
 import { DrawerState } from "../components/MyDrawer";
 import { Filter, GameCenterGeoInfo, GameCenter } from "../types";
@@ -37,7 +38,13 @@ function IndexPage(props: Prop) {
   const [spGameCenterInfoDrawerState, setSpGameCenterInfoDrawerState] = useState("closed" as DrawerState);
 
   const [filter, setFilter] = useState(intializeFilter(true));
-  const [filterExpanded, setFilterExpanded] = useState(true);
+  const [filterExpanded, setFilterExpanded] = useState(false);
+  const isSP = useMediaQuery("(max-width: 768px)");
+
+  useEffect(() => {
+    // on PC, the filter should be expanded by default; on SP it shouldn't
+    setFilterExpanded(!isSP);
+  }, [isSP]);
 
   const [snackBarOpen, setSnackBarOpen] = useState(true);
 
@@ -122,6 +129,7 @@ function IndexPage(props: Prop) {
           vertical: "bottom",
           horizontal: "center"
         }}
+        style={{ bottom: 50, zIndex: 1000 }}
         open={Boolean(viewport.zoom && viewport.zoom < 10)}
         message={<span>ズームインしてゲームセンターの情報を表示する</span>}
       />
@@ -130,6 +138,7 @@ function IndexPage(props: Prop) {
           vertical: "bottom",
           horizontal: "center"
         }}
+        style={{ bottom: 50 }}
         open={Boolean(viewport.zoom && viewport.zoom >= 10) && hasMoreThanOneFilter && snackBarOpen}
         message={
           <span>

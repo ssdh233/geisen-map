@@ -13,7 +13,6 @@ import GameCenterInfo from "./GameCenterInfo";
 import AboutSide from "./AboutSide";
 import { Filter, GameCenter } from "../types";
 import GameFilter from "./GameFilter";
-import cx from "../utils/classname";
 
 const toggleStyle = {
   color: "rgba(0, 0, 0, 0.54)",
@@ -60,11 +59,6 @@ const useStyles = makeStyles({
     zIndex: 1200,
     width: "100%",
     position: "fixed"
-  },
-  spFilterDrawerOpen: {},
-  spFilterDrawerClose: {
-    height: 48,
-    overflowY: "hidden"
   }
 });
 
@@ -82,7 +76,6 @@ type Props = {
 
 function MainSide(props: Props) {
   const [pcDrawerOpen, setPcDrawerOpen] = useState(true);
-  const [spFilterOpen, setSpFilterOpen] = useState(false);
   const [aboutSideOpen, setAboutSideOpen] = useState(false);
 
   const classes = useStyles();
@@ -92,8 +85,8 @@ function MainSide(props: Props) {
     <>
       {!isSP && (
         <div>
-          {!open && (
-            <button className={classes.openButton} onClick={() => setPcDrawerOpen(true)}>
+          {!pcDrawerOpen && (
+            <button id="openButton" className={classes.openButton} onClick={() => setPcDrawerOpen(true)}>
               <ArrowRightIcon />
             </button>
           )}
@@ -140,21 +133,13 @@ function MainSide(props: Props) {
             />
             <AboutSide open={aboutSideOpen} onDrawerClose={() => setAboutSideOpen(false)} />
           </div>
-          {/* TODO: make it swipeable */}
-          <Drawer
-            variant="permanent"
-            anchor="bottom"
-            open={spFilterOpen}
-            classes={{ paper: cx(spFilterOpen ? classes.spFilterDrawerOpen : classes.spFilterDrawerClose) }}
-          >
+          <Drawer variant="permanent" anchor="bottom" open={true}>
             <GameFilter
-              expanded={true}
-              onChangeExpanded={() => {
-                setSpFilterOpen(!spFilterOpen);
-              }}
+              expanded={props.filterExpanded}
+              onChangeExpanded={props.setFilterExpanded}
               filter={props.filter}
               onChange={props.setFilter}
-              expandedIconState={!spFilterOpen}
+              expandedIconState={!props.filterExpanded}
             />
           </Drawer>
           {props.gameCenterData && (

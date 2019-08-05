@@ -6,6 +6,7 @@ import Checkbox from "@material-ui/core/Checkbox";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import IconButton from "@material-ui/core/IconButton";
+import useMediaQuery from "@material-ui/core/useMediaQuery";
 
 import { NAME_MAP, intializeFilter } from "../constants/game";
 import cx from "../utils/classname";
@@ -20,10 +21,15 @@ type Props = {
   expandedIconState?: boolean;
 };
 
+type StyleParam = { isSP: boolean; expanded: boolean };
+
 const useStyles = makeStyles({
-  container: {
-    padding: "12px 16px"
-  },
+  container: ({ isSP, expanded }: StyleParam) => ({
+    overflow: "hidden",
+    maxHeight: expanded ? (isSP ? 500 : 1000) : 48,
+    padding: "12px 16px",
+    transition: "max-height 150ms"
+  }),
   expander: {
     padding: 0,
     border: 0,
@@ -56,17 +62,18 @@ const useStyles = makeStyles({
   expandIconRotated: {
     transform: "rotate(180deg)"
   },
-  checkBoxContainer: {
+  checkBoxContainer: ({ isSP }: StyleParam) => ({
     marginTop: 8,
     width: "100vw",
-    height: "50vh",
+    maxHeight: isSP ? "50vh" : undefined,
     overflow: "scroll",
     display: "block"
-  }
+  })
 });
 
 function GameFilter(props: Props) {
-  const classes = useStyles();
+  const isSP = useMediaQuery("(max-width:768px)");
+  const classes = useStyles({ isSP, expanded: props.expanded });
 
   const FilterCheckBox = ({ gameName }: { gameName: string }) => (
     <FormControlLabel
@@ -106,28 +113,26 @@ function GameFilter(props: Props) {
           </IconButton>
         </div>
       </div>
-      {props.expanded && (
-        <FormGroup row className={classes.checkBoxContainer}>
-          <FormControl component="fieldset">
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={hasSomthingSelected}
-                    onChange={() => props.onChange(intializeFilter(!hasSomthingSelected))}
-                    value="selectAll"
-                    color="primary"
-                  />
-                }
-                label={hasSomthingSelected ? "すべて解除" : "すべて選択"}
-              />
-              {Object.keys(NAME_MAP).map(gameName => (
-                <FilterCheckBox key={gameName} gameName={gameName} />
-              ))}
-            </FormGroup>
-          </FormControl>
-        </FormGroup>
-      )}
+      <FormGroup row className={classes.checkBoxContainer}>
+        <FormControl component="fieldset">
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={hasSomthingSelected}
+                  onChange={() => props.onChange(intializeFilter(!hasSomthingSelected))}
+                  value="selectAll"
+                  color="primary"
+                />
+              }
+              label={hasSomthingSelected ? "すべて解除" : "すべて選択"}
+            />
+            {Object.keys(NAME_MAP).map(gameName => (
+              <FilterCheckBox key={gameName} gameName={gameName} />
+            ))}
+          </FormGroup>
+        </FormControl>
+      </FormGroup>
     </div>
   );
 }

@@ -55,8 +55,6 @@ function MyDrawerContainer(props: Props) {
         drawerStyle.transform = transform;
         drawerStyle.transition = "";
         drawerStyle.transitionDuration = "";
-
-        console.log({ transform });
       }
     }
 
