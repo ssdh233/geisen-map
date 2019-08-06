@@ -48,8 +48,6 @@ function IndexPage(props: Prop) {
 
   const [snackBarOpen, setSnackBarOpen] = useState(true);
 
-  console.log(viewport.center, viewport.zoom, spGameCenterInfoDrawerState);
-
   const filteredGamecenters = filterGamecenters(props.gamecenters, filter);
   const gamecenters = getVisibleGamecenters(filteredGamecenters, viewport);
 
@@ -64,8 +62,6 @@ function IndexPage(props: Prop) {
 
     myFunc();
   }, [gameCenterId]);
-
-  console.log("rendered marks:", gamecenters.length);
 
   const hasMoreThanOneFilter =
     Object.keys(filter)
@@ -104,7 +100,6 @@ function IndexPage(props: Prop) {
         onChangeViewport={viewport => setViewport(viewport)}
         gamecenters={gamecenters}
         onMarkerClick={id => {
-          console.log("onMarkerClick", id);
           setGameCenterId(id);
           setFilterExpanded(false);
           setSpGameCenterInfoDrawerState("halfOpen");
@@ -115,7 +110,6 @@ function IndexPage(props: Prop) {
         gameCenterData={gameCenterData}
         spGameCenterInfoDrawerState={spGameCenterInfoDrawerState}
         onChangeSpGameCenterInfoDrawerState={drawerState => {
-          console.log("onChangeSpGameCenterInfoDrawerState", drawerState);
           setSpGameCenterInfoDrawerState(drawerState);
         }}
         filter={filter}
@@ -184,11 +178,8 @@ function getVisibleGamecenters(gamecenters: GameCenterGeoInfo[], viewport: Viewp
 }
 
 IndexPage.getInitialProps = async function() {
-  console.log({ API_URL });
   const res = await fetch(`${API_URL}/gamecenters`);
   const data = await res.json();
-
-  console.log(`Show data fetched. Count: ${data.length}`);
 
   return {
     gamecenters: data
