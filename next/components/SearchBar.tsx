@@ -32,7 +32,7 @@ const useStyles = makeStyles({
   paper: {
     position: "absolute",
     zIndex: 1,
-  }
+  },
 });
 
 type Props = {
