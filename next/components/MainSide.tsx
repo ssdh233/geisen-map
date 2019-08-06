@@ -133,6 +133,7 @@ function MainSide(props: Props) {
             />
             <AboutSide open={aboutSideOpen} onDrawerClose={() => setAboutSideOpen(false)} />
           </div>
+          
           <Drawer variant="permanent" anchor="bottom" open={true}>
             <GameFilter
               expanded={props.filterExpanded}

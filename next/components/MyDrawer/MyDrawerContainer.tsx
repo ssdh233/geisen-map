@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 
 import MyDrawer, { MY_DRAWER_TRANSFORM_TABLE } from "./MyDrawer";
 import { DrawerState } from "./index";
+import useScreenHeight from "../../utils/useScreenHeight";
 
 type Props = {
   drawerState: DrawerState;
@@ -27,6 +28,7 @@ function getPrevDrawerState(drawerState: DrawerState): DrawerState {
 }
 
 function MyDrawerContainer(props: Props) {
+  const screenHeight = useScreenHeight();
   const refObj = useRef({ startY: 0, isDragging: false });
   const paperRef = useRef() as any;
 
@@ -49,7 +51,7 @@ function MyDrawerContainer(props: Props) {
         const currentY = window.innerHeight - event.touches[0].clientY;
         const dy = currentY - refObj.current.startY;
 
-        const transform = `${MY_DRAWER_TRANSFORM_TABLE[drawerState]} translate(0, ${-1 * dy}px)`;
+        const transform = `${MY_DRAWER_TRANSFORM_TABLE(screenHeight)[drawerState]} translate(0, ${-1 * dy}px)`;
         const drawerStyle = paperRef.current.style;
         drawerStyle.webkitTransform = transform;
         drawerStyle.transform = transform;
@@ -91,7 +93,7 @@ function MyDrawerContainer(props: Props) {
     };
     // it's very very very important to put drawerState here. otherwise function like handleBodyTouchStart
     // will not be updated when drawerState is changed.
-  }, [drawerState]);
+  }, [drawerState, screenHeight]);
 
   const handlePaperRef = useCallback(instance => {
     paperRef.current = ReactDOM.findDOMNode(instance);
@@ -104,6 +106,7 @@ function MyDrawerContainer(props: Props) {
       }}
       drawerState={drawerState}
       onClose={() => props.onChangeDrawerState("closed")}
+      screenHeight={screenHeight}
       {...rest}
     >
       {props.children}
