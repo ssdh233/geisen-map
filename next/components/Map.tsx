@@ -1,23 +1,23 @@
 import { useState, useEffect } from "react";
-
-import {
-  Map,
-  TileLayer,
-  Marker,
-  Popup,
-  ZoomControl,
-  CircleMarker,
-  Viewport
-} from "react-leaflet";
+import useMediaQuery from "@material-ui/core/useMediaQuery";
+import { Map, TileLayer, Marker, Popup, ZoomControl, CircleMarker, Viewport } from "react-leaflet";
 import Fab from "@material-ui/core/Fab";
 import { makeStyles } from "@material-ui/core/styles";
 import MyLocationButton from "@material-ui/icons/MyLocation";
 
 import { GameCenterGeoInfo } from "../types";
+import cx from "../utils/classname";
 import debounce from "../utils/debounce";
 
 const useStyles = makeStyles({
   homeButton: {
+    position: "absolute",
+    zIndex: 1001,
+    bottom: 72,
+    right: 24,
+    backgroundColor: "white"
+  },
+  homeButtonPC: {
     position: "absolute",
     right: 12,
     bottom: 100,
@@ -36,13 +36,13 @@ type Props = {
   onChangeViewport: (viewport: Viewport) => void;
   onMarkerClick: (gameCenterId: string) => void;
   gamecenters: GameCenterGeoInfo[];
-}
+};
 
 // XXX: NO SSR
 function MyMap(props: Props) {
-  const [userLocation, setUserLocation] = useState(null as
-    | [number, number]
-    | null);
+  const isSP = useMediaQuery("(max-width:768px)");
+
+  const [userLocation, setUserLocation] = useState(null as [number, number] | null);
 
   function handleViewportChange(viewport: Viewport) {
     if (viewport.zoom && viewport.zoom >= 19) {
@@ -66,9 +66,7 @@ function MyMap(props: Props) {
       timeout: 10 * 1000
     };
 
-    let geoSuccess = function (position: {
-      coords: { latitude: number; longitude: number };
-    }) {
+    let geoSuccess = function(position: { coords: { latitude: number; longitude: number } }) {
       startPos = position;
       props.onChangeViewport({
         center: [startPos.coords.latitude, startPos.coords.longitude],
@@ -76,7 +74,7 @@ function MyMap(props: Props) {
       });
       setUserLocation([startPos.coords.latitude, startPos.coords.longitude]);
     };
-    let geoError = function (error: { code: number }) {
+    let geoError = function(error: { code: number }) {
       console.log("Error occurred. Error code: " + error.code);
       // error.code can be:
       //   0: unknown error
@@ -92,34 +90,26 @@ function MyMap(props: Props) {
   const classes = useStyles();
 
   return (
-    <Map
-      viewport={props.viewport}
-      onViewportChange={debounce(handleViewportChange, 100)}
-      zoomControl={false}
-    >
+    <Map viewport={props.viewport} onViewportChange={debounce(handleViewportChange, 100)} zoomControl={false}>
       <TileLayer
         attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <ZoomControl position="bottomright" />
+      {!isSP && <ZoomControl position="bottomright" />}
       {props.gamecenters.map(({ id, geo, name }) => {
         return (
-          <Marker
-            key={id}
-            position={[geo.lat, geo.lng]}
-            onClick={() => props.onMarkerClick(id)}
-          >
-            <Popup>{name}</Popup>
+          <Marker key={id} position={[geo.lat, geo.lng]} onClick={() => props.onMarkerClick(id)}>
+            <Popup autoPan={false}>{name}</Popup>
           </Marker>
         );
       })}
       {userLocation && <CircleMarker center={userLocation} radius={10} />}
       <Fab
-        size="small"
-        className={classes.homeButton}
+        size={isSP ? "large" : "small"}
+        className={cx(!isSP && classes.homeButtonPC, classes.homeButton)}
         onClick={handleHomeButtonClick}
       >
-        <MyLocationButton fontSize="small" />
+        <MyLocationButton fontSize={isSP ? "default" : "small"} />
       </Fab>
     </Map>
   );
