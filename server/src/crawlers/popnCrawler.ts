@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import jsdom from "jsdom";
+import cheerio from "cheerio";
 
 import Crawler from "./crawler";
 import { getGeoFromText } from "../utils/googleMapApi";
@@ -7,13 +7,13 @@ require("dotenv").config();
 
 const popnCrawler = new Crawler({
   sourceId: "popn_official",
-  urls: Array(47) // max 47
+  urls: Array(1) // max 47
     .fill(0)
     .map((_, i) => `https://p.eagate.573.jp/game/popn/peace/p/tenpo/list.html?pref=${i + 1}&search_word=&pcb_type=2`),
   getPaginatedUrls: async url => {
     const html = await fetch(url).then(res => res.text());
-    const { document } = new jsdom.JSDOM(html).window;
-    const pages = document.querySelectorAll("div.Rcont_inner > div[style='text-align:center'] > a").length;
+    const $ = cheerio.load(html);
+    const pages = $("div.Rcont_inner > div[style='text-align:center'] > a").length;
     if (pages === 0) {
       return [url];
     } else {
@@ -22,50 +22,80 @@ const popnCrawler = new Crawler({
         .map((_, i) => `${url}&page=${i}`);
     }
   },
-  getList: (document: Document) => {
-    return Array.from(document.querySelectorAll("div.Rcont_info > div > div.tenpo_data"));
-  },
-  getItem: async raw => {
+  getList: $ => Array.from($("div.Rcont_info > div > div.tenpo_data")),
+  getItem: async (_, raw) => {
     try {
-      const name = raw.children[0].textContent;
-      const address = raw.children[1].children[1].textContent;
-      const access = raw.children[3].children[1].textContent;
-      const businessHour = raw.children[5].children[1].textContent;
-      const closedDay = raw.children[7].children[1].textContent;
-      const tel = raw.children[9].children[1].textContent;
+      const name = raw
+        .children()
+        .eq(0)
+        .text();
+      const address = raw
+        .children()
+        .eq(1)
+        .children()
+        .eq(1)
+        .text();
+      const access = raw
+        .children()
+        .eq(3)
+        .children()
+        .eq(1)
+        .text();
+      const businessHour = raw
+        .children()
+        .eq(5)
+        .children()
+        .eq(1)
+        .text();
+      const closedDay = raw
+        .children()
+        .eq(7)
+        .children()
+        .eq(1)
+        .text();
+      const tel = raw
+        .children()
+        .eq(9)
+        .children()
+        .eq(1)
+        .text();
 
       let cabType = "";
-      if (raw.children[11].children[0].children[0] && raw.children[11].children[0].children[0].className === "wide") {
-        cabType += `新筐体 ${raw.children[11].children[0].children[0].textContent} `;
+      if (raw.find(".wide")) {
+        cabType += `新筐体 ${raw.find(".wide").text()} `;
       }
-      if (
-        raw.children[11].children[1].children[0] &&
-        raw.children[11].children[1].children[0].className === "standard"
-      ) {
-        cabType += `旧筐体 ${raw.children[11].children[1].children[0].textContent} `;
+      if (raw.find(".standard")) {
+        cabType += `旧筐体 ${raw.find(".standard").text()} `;
       }
 
-      const popnCardImageSrc =
-        (raw.children[11].children[2].children[0] && raw.children[11].children[2].children[0].src) || "";
-      const popnCard = popnCardImageSrc.includes("card_ok.gif")
-        ? "ポップンカードあり"
-        : popnCardImageSrc.includes("card_ng.gif")
-        ? "ポップンカード準備中..."
-        : "";
+      const popnCardImageSrc = raw
+        .children()
+        .eq(11)
+        .children()
+        .eq(2)
+        .find("img")
+        .attr("src");
+      const popnCard =
+        popnCardImageSrc &&
+        (popnCardImageSrc.includes("card_ok.gif")
+          ? "ポップンカードあり"
+          : popnCardImageSrc.includes("card_ng.gif")
+          ? "ポップンカード準備中..."
+          : "");
 
-      const paseriImageSrc =
-        (raw.children[11].children[3].children[0] && raw.children[11].children[3].children[0].src) || "";
-      const paseri = paseriImageSrc.includes("paseli.jpg") ? "パセリ利用可" : "";
-
-      const geo = await getGeoFromText(address);
-      const id = geo.lat.toFixed(4) + "," + geo.lng.toFixed(4);
+      const paseriImageSrc = raw
+        .children()
+        .eq(11)
+        .children()
+        .eq(3)
+        .find("img")
+        .attr("src");
+      const paseri = paseriImageSrc && paseriImageSrc.includes("paseli.jpg") ? "パセリ利用可" : "";
 
       const result = {
-        id,
-        geo,
+        name,
+        rawAddress: address,
         infos: [
-          name && { infoType: "name", text: name },
-          address && { infoType: "address", text: address },
           access && { infoType: "access", text: access },
           businessHour && { infoType: "businessHour", text: businessHour },
           closedDay && { infoType: "closedDay", text: "定休日 " + closedDay },
@@ -88,7 +118,8 @@ const popnCrawler = new Crawler({
 
       return result;
     } catch (error) {
-      console.error(raw.outerHTML, error);
+      console.error(raw.html());
+      console.error(error);
       return null;
     }
   }

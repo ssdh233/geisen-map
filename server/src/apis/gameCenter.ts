@@ -33,7 +33,7 @@ const gameCenterApi = (app: express.Express) => {
   app.get("/gamecenter/:id", async (req, res) => {
     const { id } = req.params;
 
-    const rawResult = await GameCenterModel.findOne({ id });
+    const rawResult = await GameCenterModel.findOne({ _id: id });
 
     if (rawResult) {
       const result = processRawResult(rawResult);
@@ -49,27 +49,10 @@ const gameCenterApi = (app: express.Express) => {
       { $match: {} },
       {
         $project: {
-          _id: 0,
-          id: 1,
+          _id: 1,
           geo: 1,
-          infos: {
-            $filter: {
-              input: "$infos",
-              as: "info",
-              cond: { $eq: ["$$info.infoType", "name"] }
-            }
-          },
+          name: 1,
           games: { $map: { input: "$games", as: "game", in: "$$game.name" } }
-        }
-      },
-      {
-        $project: {
-          id: 1,
-          geo: 1,
-          name: {
-            $arrayElemAt: [{ $map: { input: "$infos", as: "info", in: "$$info.text" } }, 0]
-          },
-          games: 1
         }
       }
     ]);
@@ -115,13 +98,10 @@ function processRawResult(rawResult: GameCenter) {
     };
   });
 
-  const name = infoResult.name.text;
-  delete infoResult.name;
-
   return {
-    id: rawResult.id,
     geo: rawResult.geo,
-    name,
+    name: rawResult.name,
+    address: rawResult.address,
     infos: Object.values(infoResult),
     games
   };

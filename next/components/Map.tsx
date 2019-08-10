@@ -96,9 +96,9 @@ function MyMap(props: Props) {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       {!isSP && <ZoomControl position="bottomright" />}
-      {props.gamecenters.map(({ id, geo, name }) => {
+      {props.gamecenters.map(({ _id, geo, name }) => {
         return (
-          <Marker key={id} position={[geo.lat, geo.lng]} onClick={() => props.onMarkerClick(id)}>
+          <Marker key={_id} position={[geo.lat, geo.lng]} onClick={() => props.onMarkerClick(_id)}>
             <Popup autoPan={false}>{name}</Popup>
           </Marker>
         );

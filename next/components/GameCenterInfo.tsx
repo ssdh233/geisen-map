@@ -24,7 +24,7 @@ function GameCenterInfo(props: Prop) {
   if (!props.data) return null;
 
   const isSP = useMediaQuery("(max-width: 768px)");
-  const { name, infos, games } = props.data;
+  const { name, address, infos, games } = props.data;
   const classes = useStyles({ isSP });
 
   return (
@@ -32,7 +32,8 @@ function GameCenterInfo(props: Prop) {
       <h2 className={classes.name}>{name}</h2>
       <h3>店舗情報</h3>
       <ul>
-        {infos && infos.filter(info => info.infoType !== "name").map(info => <li key={info.infoType}>{info.text}</li>)}
+        <li>{address.fullAddress}</li>
+        {infos && infos.map(info => <li key={info.infoType}>{info.text}</li>)}
       </ul>
       <h3>ゲーム情報</h3>
       <ul>

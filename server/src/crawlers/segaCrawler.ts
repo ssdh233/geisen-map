@@ -7,17 +7,16 @@ require("dotenv").config();
 
 const segaCrawler = (gameId: string, gameName: string) =>
   new Crawler({
-    useCheerio: true,
     sourceId: "allnet",
-    urls: Array(47) // max 47
+    urls: Array(1) // max 47
       .fill(0)
       .map((_, i) => {
         let id = "" + (i + 1);
         while (id.length < 2) id = "0" + id;
         return `https://location.am-all.net/alm/location?gm=${gameId}&ct=1000&at=${i}`;
       }),
-    getList: ($: CheerioStatic) => Array.from($(".store_list > li")),
-    getItem: async raw => {
+    getList: $ => Array.from($(".store_list > li")),
+    getItem: async (_, raw) => {
       const onclickScript = raw.find(".bt_details").attr("onclick");
       let [, tenpoUrl] = onclickScript.match(/location\.href='(.*?)';/);
       tenpoUrl = "https://location.am-all.net/alm/" + tenpoUrl;
@@ -38,6 +37,7 @@ const segaCrawler = (gameId: string, gameName: string) =>
         const text = $(el).text();
         if (text.includes("〒")) {
           address = text.replace(/\s\s+/g, " ").trim();
+          address = address.replace(/〒[0-9]*-[0-9]*/, "");
         } else if (text.includes("営業時間")) {
           businessHour = text;
         }
@@ -49,15 +49,11 @@ const segaCrawler = (gameId: string, gameName: string) =>
       let lat = Number(latText);
       let lng = Number(lngText);
 
-      const id = lat.toFixed(4) + "," + lng.toFixed(4);
       return {
-        id,
         geo: { lat, lng },
-        infos: [
-          name && { infoType: "name", text: name },
-          address && { infoType: "address", text: address },
-          businessHour && { infoType: "businessHour", text: businessHour }
-        ].filter(x => x),
+        name: name,
+        rawAddress: address,
+        infos: [businessHour && { infoType: "businessHour", text: businessHour }].filter(x => x),
         games: [{ name: gameName, infos: [{ infoType: "main", text: "" }] }]
       };
     }
