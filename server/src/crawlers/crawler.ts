@@ -89,6 +89,8 @@ export default class Crawler {
 
         const address = await normalizeAddress(rawItem.rawAddress);
 
+        if (!address) return null;
+
         if (rawItem.geo) {
           return { ...rawItem, geo: rawItem.geo, address };
         } else {
