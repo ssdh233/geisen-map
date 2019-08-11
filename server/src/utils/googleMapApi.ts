@@ -1,3 +1,5 @@
+import fetch from "node-fetch";
+
 type Geo = {
   lat: number;
   lng: number;

@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import cheerio from "cheerio";
 
-import Crawler from "./crawler";
+import Crawler, { GameCenterWithRawAddress } from "./crawler";
 // import { getGeoFromText } from "../utils/googleMapApi";
 require("dotenv").config();
 
@@ -33,37 +33,20 @@ const bemaniCrawler = (gameKeyword: string, gameName: string) =>
         return [];
       }
     },
-    getList: ($: CheerioStatic) => Array.from($("div.cl_shop_bloc")),
-    getItem: async raw => {
+    getList: $ => Array.from($("div.cl_shop_bloc")),
+    getItem: async (_, raw) => {
       const name = raw.attr("data-name");
       const address = raw.attr("data-address");
       const access = raw.attr("data-access");
       const telno = raw.attr("data-telno");
       const operationTime = raw.attr("data-operationtime");
       const holiday = raw.attr("data-holiday");
-      let lat = raw.attr("data-latitude");
-      let lng = raw.attr("data-longitude");
       const paseri = raw.find("div.cl_shop_paseli") ? "パセリ使用可" : "";
 
-      if (!lat || !lng) {
-        // need to get from google map api
-        // const geo = await getGeoFromText(address);
-        // lat = geo.lat;
-        // lng = geo.lng;
-        lat = 0;
-        lng = 0;
-      } else {
-        lat = parseFloat(lat);
-        lng = parseFloat(lng);
-      }
-
-      const id = lat.toFixed(4) + "," + lng.toFixed(4);
-      return {
-        id,
-        geo: { lat, lng },
+      const item: GameCenterWithRawAddress = {
+        name,
+        rawAddress: address,
         infos: [
-          name && { infoType: "name", text: name },
-          address && { infoType: "address", text: address },
           access && { infoType: "access", text: access },
           operationTime && { infoType: "businessHour", text: operationTime },
           holiday && { infoType: "closedDay", text: "定休日 " + holiday },
@@ -76,8 +59,16 @@ const bemaniCrawler = (gameKeyword: string, gameName: string) =>
           }
         ]
       };
-    },
-    useCheerio: true
+
+      let lat = parseFloat(raw.attr("data-latitude"));
+      let lng = parseFloat(raw.attr("data-longitude"));
+
+      if (lat && lng) {
+        item.geo = { lat, lng };
+      }
+
+      return item;
+    }
   });
 
 async function start() {
