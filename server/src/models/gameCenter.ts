@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import stringSimilarity from "string-similarity";
+import normalizeGameCenterName from "../utils/gameCenterName";
 
 export type Info = {
   infoType: string; // Enum?
@@ -100,8 +101,11 @@ function isSameGameCenter(gameCenterA: GameCenter, gameCenterB: GameCenter): boo
     return false;
   }
 
-  console.log(gameCenterA.name, gameCenterB.name);
-  const nameSimilarity = stringSimilarity.compareTwoStrings(gameCenterA.name, gameCenterB.name);
+  const normalizeNameA = normalizeGameCenterName(gameCenterA.name, gameCenterA.address);
+  const normalizeNameB = normalizeGameCenterName(gameCenterB.name, gameCenterB.address);
+
+  console.log(normalizeNameA, normalizeNameB);
+  const nameSimilarity = stringSimilarity.compareTwoStrings(normalizeNameA, normalizeNameB);
   console.log({ nameSimilarity });
 
   console.log(gameCenterA.address.fullAddress, gameCenterB.address.fullAddress);
@@ -112,7 +116,7 @@ function isSameGameCenter(gameCenterA: GameCenter, gameCenterB: GameCenter): boo
   console.log({ addressSimilarity });
 
   // exactly same address with almost same name
-  if (addressSimilarity > 0.9 && nameSimilarity > 0.5) {
+  if (addressSimilarity > 0.8 && nameSimilarity > 0.5) {
     return true;
   }
 

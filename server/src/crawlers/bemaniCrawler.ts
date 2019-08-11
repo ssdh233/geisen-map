@@ -12,7 +12,7 @@ const bemaniCrawler = (gameKeyword: string, gameName: string) =>
     fetchHeaders: {
       cookie: "facility_dspcount=50"
     },
-    urls: Array(1) // max 47
+    urls: Array(47) // max 47
       .fill(0)
       .map((_, i) => {
         let id = "" + (i + 1);

@@ -7,7 +7,7 @@ require("dotenv").config();
 
 const popnCrawler = new Crawler({
   sourceId: "popn_official",
-  urls: Array(1) // max 47
+  urls: Array(47) // max 47
     .fill(0)
     .map((_, i) => `https://p.eagate.573.jp/game/popn/peace/p/tenpo/list.html?pref=${i + 1}&search_word=&pcb_type=2`),
   getPaginatedUrls: async url => {

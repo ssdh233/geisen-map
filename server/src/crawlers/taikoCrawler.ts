@@ -5,7 +5,7 @@ require("dotenv").config();
 
 const taikoCrawler = new Crawler({
   sourceId: "taiko_official",
-  urls: Array(1) // max 47
+  urls: Array(47) // max 47
     .fill(0)
     .map((_, i) => {
       let id = "" + (i + 1);
