@@ -8,7 +8,8 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import IconButton from "@material-ui/core/IconButton";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 
-import { NAME_MAP, intializeFilter } from "../constants/game";
+import { NAME_MAP } from "../constants/game";
+import { stringToFilter } from "../utils/filter";
 import cx from "../utils/classname";
 import { Filter } from "../types";
 
@@ -120,7 +121,7 @@ function GameFilter(props: Props) {
               control={
                 <Checkbox
                   checked={hasSomthingSelected}
-                  onChange={() => props.onChange(intializeFilter(!hasSomthingSelected))}
+                  onChange={() => props.onChange(stringToFilter(hasSomthingSelected ? "none" : "all"))}
                   value="selectAll"
                   color="primary"
                 />

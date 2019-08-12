@@ -1,16 +1,19 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Head from "next/head";
+import getConfig from "next/config";
+import { useRouter } from "next/router";
 import fetch from "isomorphic-unfetch";
 import { Viewport } from "react-leaflet";
 import Snackbar from "@material-ui/core/Snackbar";
 import Button from "@material-ui/core/Button";
-import getConfig from "next/config";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 
 import { DrawerState } from "../components/MyDrawer";
 import { Filter, GameCenterGeoInfo, GameCenter } from "../types";
-import { intializeFilter } from "../constants/game";
+import { viewportToString, stringToViewport } from "../utils/viewport";
+import { filterToString, stringToFilter } from "../utils/filter";
+import { toQuery } from "../utils/query";
 
 const { publicRuntimeConfig } = getConfig();
 const { API_URL } = publicRuntimeConfig;
@@ -27,17 +30,21 @@ type Prop = {
   gamecenters: GameCenterGeoInfo[];
 };
 
+const defaultViewport = {
+  center: [38.5548225, 135.8920016],
+  zoom: 6
+} as Viewport;
+
 function IndexPage(props: Prop) {
-  const [viewport, setViewport] = useState({
-    center: [38.5548225, 135.8920016],
-    zoom: 6
-  } as Viewport);
+  const router = useRouter();
+  const { v: viewportQuery, f: filterQuery } = router.query;
+  const viewport = stringToViewport(viewportQuery as string) || defaultViewport;
+  const filter = stringToFilter(filterQuery as string);
 
   const [gameCenterId, setGameCenterId] = useState("");
   const [gameCenterData, setGameCenterData] = useState(null as GameCenter | null);
   const [spGameCenterInfoDrawerState, setSpGameCenterInfoDrawerState] = useState("closed" as DrawerState);
 
-  const [filter, setFilter] = useState(intializeFilter(true));
   const [filterExpanded, setFilterExpanded] = useState(false);
   const isSP = useMediaQuery("(max-width: 768px)");
 
@@ -63,10 +70,24 @@ function IndexPage(props: Prop) {
     myFunc();
   }, [gameCenterId]);
 
+  function handleChangeViewport(viewport: Viewport): void {
+    const viewportStr = viewportToString(viewport);
+    const newQuery = toQuery({ ...router.query, v: viewportStr });
+    router.push(`/?${newQuery}`, `/?${newQuery}`, { shallow: true });
+  }
+
+  function handleChangeFilter(filter: Filter): void {
+    const filterStr = filterToString(filter);
+
+    const newQuery = toQuery({ ...router.query, f: filterStr });
+    router.push(`/?${newQuery}`, `/?${newQuery}`, { shallow: true });
+  }
+
   const hasMoreThanOneFilter =
     Object.keys(filter)
       .map(key => filter[key])
       .filter(isTrue => isTrue).length > 1;
+
   return (
     <div>
       <Head>
@@ -97,7 +118,7 @@ function IndexPage(props: Prop) {
       </style>
       <Map
         viewport={viewport}
-        onChangeViewport={viewport => setViewport(viewport)}
+        onChangeViewport={handleChangeViewport}
         gamecenters={gamecenters}
         onMarkerClick={id => {
           setGameCenterId(id);
@@ -113,10 +134,10 @@ function IndexPage(props: Prop) {
           setSpGameCenterInfoDrawerState(drawerState);
         }}
         filter={filter}
-        setFilter={setFilter}
         filterExpanded={filterExpanded}
         setFilterExpanded={setFilterExpanded}
-        setViewport={setViewport}
+        onChangeViewport={handleChangeViewport}
+        onChangeFilter={handleChangeFilter}
       />
       <Snackbar
         anchorOrigin={{
