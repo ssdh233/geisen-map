@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
-import { Map, TileLayer, Marker, Popup, ZoomControl, CircleMarker, Viewport } from "react-leaflet";
+import { Map, TileLayer, Popup, ZoomControl, CircleMarker, Viewport } from "react-leaflet";
 import Fab from "@material-ui/core/Fab";
 import { makeStyles } from "@material-ui/core/styles";
 import MyLocationButton from "@material-ui/icons/MyLocation";
 
+import MyMarker from "../components/MyMarker";
 import { GameCenterGeoInfo } from "../types";
 import cx from "../utils/classname";
 import debounce from "../utils/debounce";
@@ -32,6 +33,7 @@ const useStyles = makeStyles({
 });
 
 type Props = {
+  gameCenterId?: string;
   viewport: Viewport;
   onChangeViewport: (viewport: Viewport) => void;
   onMarkerClick: (gameCenterId: string) => void;
@@ -98,9 +100,14 @@ function MyMap(props: Props) {
       {!isSP && <ZoomControl position="bottomright" />}
       {props.gamecenters.map(({ _id, geo, name }) => {
         return (
-          <Marker key={_id} position={[geo.lat, geo.lng]} onClick={() => props.onMarkerClick(_id)}>
+          <MyMarker
+            key={_id}
+            isOpen={_id === props.gameCenterId}
+            position={[geo.lat, geo.lng]}
+            onClick={() => props.onMarkerClick(_id)}
+          >
             <Popup autoPan={false}>{name}</Popup>
-          </Marker>
+          </MyMarker>
         );
       })}
       {userLocation && <CircleMarker center={userLocation} radius={10} />}

@@ -37,20 +37,20 @@ const defaultViewport = {
 
 function IndexPage(props: Prop) {
   const router = useRouter();
-  const { v: viewportQuery, f: filterQuery } = router.query;
+  const { v: viewportQuery, f: filterQuery, g: gameCenterId } = router.query;
   const viewport = stringToViewport(viewportQuery as string) || defaultViewport;
   const filter = stringToFilter(filterQuery as string);
 
-  const [gameCenterId, setGameCenterId] = useState("");
   const [gameCenterData, setGameCenterData] = useState(null as GameCenter | null);
   const [spGameCenterInfoDrawerState, setSpGameCenterInfoDrawerState] = useState("closed" as DrawerState);
 
-  const [filterExpanded, setFilterExpanded] = useState(false);
+  // hide filter if there is gameCenterId on query
+  const [filterExpanded, setFilterExpanded] = useState(!gameCenterId);
   const isSP = useMediaQuery("(max-width: 768px)");
 
   useEffect(() => {
     // on PC, the filter should be expanded by default; on SP it shouldn't
-    setFilterExpanded(!isSP);
+    setFilterExpanded(!gameCenterId && !isSP);
   }, [isSP]);
 
   const [snackBarOpen, setSnackBarOpen] = useState(true);
@@ -70,6 +70,11 @@ function IndexPage(props: Prop) {
     myFunc();
   }, [gameCenterId]);
 
+  function handleChangeGameCenter(gameCenterId: string): void {
+    const newQuery = toQuery({ ...router.query, g: gameCenterId });
+    router.push(`/?${newQuery}`, `/?${newQuery}`, { shallow: true });
+  }
+
   function handleChangeViewport(viewport: Viewport): void {
     const viewportStr = viewportToString(viewport);
     const newQuery = toQuery({ ...router.query, v: viewportStr });
@@ -78,7 +83,6 @@ function IndexPage(props: Prop) {
 
   function handleChangeFilter(filter: Filter): void {
     const filterStr = filterToString(filter);
-
     const newQuery = toQuery({ ...router.query, f: filterStr });
     router.push(`/?${newQuery}`, `/?${newQuery}`, { shallow: true });
   }
@@ -117,17 +121,18 @@ function IndexPage(props: Prop) {
         `}
       </style>
       <Map
+        gameCenterId={gameCenterId as string}
         viewport={viewport}
         onChangeViewport={handleChangeViewport}
         gamecenters={gamecenters}
         onMarkerClick={id => {
-          setGameCenterId(id);
+          handleChangeGameCenter(id);
           setFilterExpanded(false);
           setSpGameCenterInfoDrawerState("halfOpen");
         }}
       />
       <MainSide
-        gameCenterId={gameCenterId}
+        gameCenterId={gameCenterId as string}
         gameCenterData={gameCenterData}
         spGameCenterInfoDrawerState={spGameCenterInfoDrawerState}
         onChangeSpGameCenterInfoDrawerState={drawerState => {
