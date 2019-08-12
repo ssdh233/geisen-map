@@ -1,4 +1,3 @@
-import { Filter } from "../types";
 
 // TODO share it between front and back
 export const NAME_MAP = {
@@ -22,9 +21,3 @@ export const NAME_MAP = {
   chuni: "チューニズム",
   diva: "初音ミク Project DIVA Arcade Future Tone"
 } as { [gameName: string]: string };
-
-export const intializeFilter = (flag: boolean): Filter => {
-  const initialFilter = {} as Filter;
-  Object.keys(NAME_MAP).forEach(key => (initialFilter[key] = flag));
-  return initialFilter;
-};

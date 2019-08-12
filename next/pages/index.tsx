@@ -1,16 +1,19 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Head from "next/head";
+import getConfig from "next/config";
+import { useRouter } from "next/router";
 import fetch from "isomorphic-unfetch";
 import { Viewport } from "react-leaflet";
 import Snackbar from "@material-ui/core/Snackbar";
 import Button from "@material-ui/core/Button";
-import getConfig from "next/config";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 
 import { DrawerState } from "../components/MyDrawer";
 import { Filter, GameCenterGeoInfo, GameCenter } from "../types";
-import { intializeFilter } from "../constants/game";
+import { viewportToString, stringToViewport } from "../utils/viewport";
+import { filterToString, stringToFilter } from "../utils/filter";
+import { toQuery } from "../utils/query";
 
 const { publicRuntimeConfig } = getConfig();
 const { API_URL } = publicRuntimeConfig;
@@ -27,23 +30,27 @@ type Prop = {
   gamecenters: GameCenterGeoInfo[];
 };
 
-function IndexPage(props: Prop) {
-  const [viewport, setViewport] = useState({
-    center: [38.5548225, 135.8920016],
-    zoom: 6
-  } as Viewport);
+const defaultViewport = {
+  center: [38.5548225, 135.8920016],
+  zoom: 6
+} as Viewport;
 
-  const [gameCenterId, setGameCenterId] = useState("");
+function IndexPage(props: Prop) {
+  const router = useRouter();
+  const { v: viewportQuery, f: filterQuery, g: gameCenterId } = router.query;
+  const viewport = stringToViewport(viewportQuery as string) || defaultViewport;
+  const filter = stringToFilter(filterQuery as string);
+
   const [gameCenterData, setGameCenterData] = useState(null as GameCenter | null);
   const [spGameCenterInfoDrawerState, setSpGameCenterInfoDrawerState] = useState("closed" as DrawerState);
 
-  const [filter, setFilter] = useState(intializeFilter(true));
-  const [filterExpanded, setFilterExpanded] = useState(false);
+  // hide filter if there is gameCenterId on query
+  const [filterExpanded, setFilterExpanded] = useState(!gameCenterId);
   const isSP = useMediaQuery("(max-width: 768px)");
 
   useEffect(() => {
     // on PC, the filter should be expanded by default; on SP it shouldn't
-    setFilterExpanded(!isSP);
+    setFilterExpanded(!gameCenterId && !isSP);
   }, [isSP]);
 
   const [snackBarOpen, setSnackBarOpen] = useState(true);
@@ -63,10 +70,28 @@ function IndexPage(props: Prop) {
     myFunc();
   }, [gameCenterId]);
 
+  function handleChangeGameCenter(gameCenterId: string): void {
+    const newQuery = toQuery({ ...router.query, g: gameCenterId });
+    router.push(`/?${newQuery}`, `/?${newQuery}`, { shallow: true });
+  }
+
+  function handleChangeViewport(viewport: Viewport): void {
+    const viewportStr = viewportToString(viewport);
+    const newQuery = toQuery({ ...router.query, v: viewportStr });
+    router.push(`/?${newQuery}`, `/?${newQuery}`, { shallow: true });
+  }
+
+  function handleChangeFilter(filter: Filter): void {
+    const filterStr = filterToString(filter);
+    const newQuery = toQuery({ ...router.query, f: filterStr });
+    router.push(`/?${newQuery}`, `/?${newQuery}`, { shallow: true });
+  }
+
   const hasMoreThanOneFilter =
     Object.keys(filter)
       .map(key => filter[key])
       .filter(isTrue => isTrue).length > 1;
+
   return (
     <div>
       <Head>
@@ -96,27 +121,28 @@ function IndexPage(props: Prop) {
         `}
       </style>
       <Map
+        gameCenterId={gameCenterId as string}
         viewport={viewport}
-        onChangeViewport={viewport => setViewport(viewport)}
+        onChangeViewport={handleChangeViewport}
         gamecenters={gamecenters}
         onMarkerClick={id => {
-          setGameCenterId(id);
+          handleChangeGameCenter(id);
           setFilterExpanded(false);
           setSpGameCenterInfoDrawerState("halfOpen");
         }}
       />
       <MainSide
-        gameCenterId={gameCenterId}
+        gameCenterId={gameCenterId as string}
         gameCenterData={gameCenterData}
         spGameCenterInfoDrawerState={spGameCenterInfoDrawerState}
         onChangeSpGameCenterInfoDrawerState={drawerState => {
           setSpGameCenterInfoDrawerState(drawerState);
         }}
         filter={filter}
-        setFilter={setFilter}
         filterExpanded={filterExpanded}
         setFilterExpanded={setFilterExpanded}
-        setViewport={setViewport}
+        onChangeViewport={handleChangeViewport}
+        onChangeFilter={handleChangeFilter}
       />
       <Snackbar
         anchorOrigin={{
