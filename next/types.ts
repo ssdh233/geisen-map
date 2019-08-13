@@ -30,12 +30,14 @@ export type GameCenterGeoInfo = {
   _id: string;
   geo: Geo;
   name: string;
+  description: string;
   games: string[]; // TODO Enum?
 };
 
 export type Geo = {
   lat: number;
   lng: number;
+  zoom?: number;
 };
 
 export type Filter = { [game: string]: boolean };
