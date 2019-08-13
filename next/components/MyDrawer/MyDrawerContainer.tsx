@@ -32,7 +32,7 @@ function MyDrawerContainer(props: Props) {
   const refObj = useRef({ startY: 0, isDragging: false });
   const paperRef = useRef() as any;
 
-  const { drawerState, ...rest } = props;
+  const { drawerState, onChangeDrawerState, children, ...rest } = props;
 
   useEffect(() => {
     function handleBodyTouchStart(event: TouchEvent) {
