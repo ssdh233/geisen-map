@@ -9,7 +9,7 @@ import useMediaQuery from "@material-ui/core/useMediaQuery";
 
 import MyDrawer, { DrawerState } from "./MyDrawer";
 import SearchBar from "./SearchBar";
-import GameCenterInfo from "./GameCenterInfo";
+import GameCenterInfo, { GameCenterInfoHeader, GameCenterInfoBody } from "./GameCenterInfo";
 import AboutSide from "./AboutSide";
 import { Filter, GameCenter } from "../types";
 import GameFilter from "./GameFilter";
@@ -145,10 +145,11 @@ function MainSide(props: Props) {
           </Drawer>
           {props.gameCenterData && (
             <MyDrawer
+              header={<GameCenterInfoHeader data={props.gameCenterData} />}
               drawerState={props.spGameCenterInfoDrawerState}
               onChangeDrawerState={props.onChangeSpGameCenterInfoDrawerState}
             >
-              <GameCenterInfo data={props.gameCenterData} />
+              <GameCenterInfoBody data={props.gameCenterData} />
             </MyDrawer>
           )}
         </div>
