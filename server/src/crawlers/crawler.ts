@@ -161,10 +161,9 @@ export default class Crawler {
         let currentGame;
         let index = gameCenterEntity.games.findIndex(x => x.name === gameItem.name);
         if (index >= 0) {
-          const currentGameInfos = gameCenterEntity.games[index].infos;
-          gameCenterEntity.games[index].infos = gameCenterEntity.games[index].infos.filter(
-            info => info.sourceId !== that.gameSourceId
-          );
+          let currentGameInfos = gameCenterEntity.games[index].infos;
+          // clear previous info from this source
+          currentGameInfos = currentGameInfos.filter(info => info.sourceId !== that.gameSourceId);
           gameCenterEntity.games[index].infos = [...currentGameInfos, ...gameItem.infos];
         } else {
           currentGame = { name: gameItem.name, infos: gameItem.infos };
@@ -172,7 +171,6 @@ export default class Crawler {
         }
       });
 
-      console.log({ gameCenterEntity });
       await gameCenterEntity.save();
     }
     console.log(`Saved ${flatResults.length} Items, new game center: ${newGameCenterCount}`);
