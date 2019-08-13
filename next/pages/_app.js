@@ -3,10 +3,13 @@ import App, { Container } from "next/app";
 import Head from "next/head";
 import getConfig from "next/config";
 import { ThemeProvider } from "@material-ui/styles";
+import { createMuiTheme } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 
 const { publicRuntimeConfig } = getConfig();
 const { NO_GOOGLE_ANALYTICS } = publicRuntimeConfig;
+
+const theme = createMuiTheme({});
 
 class MyApp extends App {
   componentDidMount() {
@@ -39,7 +42,7 @@ class MyApp extends App {
             </>
           )}
         </Head>
-        <ThemeProvider>
+        <ThemeProvider theme={theme}>
           {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
           <CssBaseline />
           <Component {...pageProps} />

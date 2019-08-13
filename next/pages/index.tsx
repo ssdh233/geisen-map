@@ -6,7 +6,6 @@ import { useRouter } from "next/router";
 import fetch from "isomorphic-unfetch";
 import { Viewport } from "react-leaflet";
 import Snackbar from "@material-ui/core/Snackbar";
-import Button from "@material-ui/core/Button";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 
 import { DrawerState } from "../components/MyDrawer";
@@ -53,8 +52,6 @@ function IndexPage(props: Prop) {
     setFilterExpanded(!gameCenterId && !isSP);
   }, [isSP]);
 
-  const [snackBarOpen, setSnackBarOpen] = useState(true);
-
   const filteredGamecenters = filterGamecenters(props.gamecenters, filter);
   const gamecenters = getVisibleGamecenters(filteredGamecenters, viewport);
 
@@ -64,13 +61,15 @@ function IndexPage(props: Prop) {
         const res = await fetch(`${API_URL}/gamecenter/${gameCenterId}`);
         const data = await res.json();
         setGameCenterData(data);
+      } else {
+        setGameCenterData(null);
       }
     }
 
     myFunc();
   }, [gameCenterId]);
 
-  function handleChangeGameCenter(gameCenterId: string): void {
+  function handleChangeGameCenter(gameCenterId: string | null): void {
     const newQuery = toQuery({ ...router.query, g: gameCenterId });
     router.push(`/?${newQuery}`, `/?${newQuery}`, { shallow: true });
   }
@@ -86,11 +85,6 @@ function IndexPage(props: Prop) {
     const newQuery = toQuery({ ...router.query, f: filterStr });
     router.push(`/?${newQuery}`, `/?${newQuery}`, { shallow: true });
   }
-
-  const hasMoreThanOneFilter =
-    Object.keys(filter)
-      .map(key => filter[key])
-      .filter(isTrue => isTrue).length > 1;
 
   return (
     <div>
@@ -130,6 +124,13 @@ function IndexPage(props: Prop) {
           setFilterExpanded(false);
           setSpGameCenterInfoDrawerState("halfOpen");
         }}
+        onMarkerUnselect={() => {
+          handleChangeGameCenter(null);
+          if (!isSP) {
+            setFilterExpanded(true);
+          }
+          setSpGameCenterInfoDrawerState("closed");
+        }}
       />
       <MainSide
         gameCenterId={gameCenterId as string}
@@ -152,24 +153,6 @@ function IndexPage(props: Prop) {
         style={{ bottom: 50, zIndex: 1000 }}
         open={Boolean(viewport.zoom && viewport.zoom < 10)}
         message={<span>ズームインしてゲームセンターの情報を表示する</span>}
-      />
-      <Snackbar
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "center"
-        }}
-        style={{ bottom: 50 }}
-        open={Boolean(viewport.zoom && viewport.zoom >= 10) && hasMoreThanOneFilter && snackBarOpen}
-        message={
-          <span>
-            複数の機種で検索する際、同じゲーセンが違う場所で表示されることがありますのでご了承ください（近い内に改善する予定です）
-          </span>
-        }
-        action={[
-          <Button color="secondary" size="small" onClick={() => setSnackBarOpen(false)}>
-            閉じる
-          </Button>
-        ]}
       />
     </div>
   );
