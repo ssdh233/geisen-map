@@ -10,29 +10,39 @@ type Prop = {
 
 const useStyles = makeStyles({
   gameCenterInfo: ({ isSP }: { isSP: boolean }) => ({
-    padding: "16px 24px",
+    padding: "0 24px 16px",
     width: isSP ? "100%" : 400
   }),
   name: ({ isSP }: { isSP: boolean }) => ({
     // left/right margin to make sure it's not covering the close button on SP
-    margin: isSP ? "0 30px 20px" : "0 0 20px",
+    padding: isSP ? "16px 30px" : "16px 24px",
     textAlign: isSP ? "center" : "left"
   })
 });
 
-function GameCenterInfo(props: Prop) {
+export function GameCenterInfoHeader(props: Prop) {
   if (!props.data) return null;
 
+  const { name } = props.data;
   const isSP = useMediaQuery("(max-width: 768px)");
-  const { name, infos, games } = props.data;
+  const classes = useStyles({ isSP });
+
+  return <h2 className={classes.name}>{name}</h2>;
+}
+
+export function GameCenterInfoBody(props: Prop) {
+  if (!props.data) return null;
+
+  const { address, infos, games } = props.data;
+  const isSP = useMediaQuery("(max-width: 768px)");
   const classes = useStyles({ isSP });
 
   return (
     <div className={classes.gameCenterInfo}>
-      <h2 className={classes.name}>{name}</h2>
       <h3>店舗情報</h3>
       <ul>
-        {infos && infos.filter(info => info.infoType !== "name").map(info => <li key={info.infoType}>{info.text}</li>)}
+        <li>{address.fullAddress}</li>
+        {infos && infos.map(info => <li key={info.infoType}>{info.text}</li>)}
       </ul>
       <h3>ゲーム情報</h3>
       <ul>
@@ -52,6 +62,15 @@ function GameCenterInfo(props: Prop) {
           ))}
       </ul>
     </div>
+  );
+}
+
+function GameCenterInfo(props: Prop) {
+  return (
+    <>
+      <GameCenterInfoHeader {...props} />
+      <GameCenterInfoBody {...props} />
+    </>
   );
 }
 

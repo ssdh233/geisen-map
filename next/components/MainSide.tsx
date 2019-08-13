@@ -9,7 +9,7 @@ import useMediaQuery from "@material-ui/core/useMediaQuery";
 
 import MyDrawer, { DrawerState } from "./MyDrawer";
 import SearchBar from "./SearchBar";
-import GameCenterInfo from "./GameCenterInfo";
+import GameCenterInfo, { GameCenterInfoHeader, GameCenterInfoBody } from "./GameCenterInfo";
 import AboutSide from "./AboutSide";
 import { Filter, GameCenter } from "../types";
 import GameFilter from "./GameFilter";
@@ -66,10 +66,10 @@ type Props = {
   gameCenterId: string;
   gameCenterData: GameCenter | null;
   filter: Filter;
-  setFilter: Dispatch<SetStateAction<Filter>>;
   filterExpanded: boolean;
   setFilterExpanded: Dispatch<SetStateAction<boolean>>;
-  setViewport: Dispatch<SetStateAction<Viewport>>;
+  onChangeViewport: (viewport: Viewport) => void;
+  onChangeFilter: (filter: Filter) => void;
   spGameCenterInfoDrawerState: DrawerState;
   onChangeSpGameCenterInfoDrawerState: (drawerState: DrawerState) => void;
 };
@@ -107,7 +107,7 @@ function MainSide(props: Props) {
             <div className={classes.sideContainer}>
               <div className={classes.searchBarContainer}>
                 <SearchBar
-                  onSearch={viewport => props.setViewport(viewport)}
+                  onSearch={viewport => props.onChangeViewport(viewport)}
                   onMenuButtonClick={() => setAboutSideOpen(true)}
                 />
               </div>
@@ -115,7 +115,7 @@ function MainSide(props: Props) {
                 expanded={props.filterExpanded}
                 onChangeExpanded={props.setFilterExpanded}
                 filter={props.filter}
-                onChange={props.setFilter}
+                onChange={props.onChangeFilter}
               />
               <Divider />
               {props.gameCenterData && <GameCenterInfo data={props.gameCenterData} />}
@@ -128,27 +128,28 @@ function MainSide(props: Props) {
         <div className={classes.spContainer}>
           <div className={classes.searchBarContainer}>
             <SearchBar
-              onSearch={viewport => props.setViewport(viewport)}
+              onSearch={viewport => props.onChangeViewport(viewport)}
               onMenuButtonClick={() => setAboutSideOpen(true)}
             />
             <AboutSide open={aboutSideOpen} onDrawerClose={() => setAboutSideOpen(false)} />
           </div>
-          
+
           <Drawer variant="permanent" anchor="bottom" open={true}>
             <GameFilter
               expanded={props.filterExpanded}
               onChangeExpanded={props.setFilterExpanded}
               filter={props.filter}
-              onChange={props.setFilter}
+              onChange={props.onChangeFilter}
               expandedIconState={!props.filterExpanded}
             />
           </Drawer>
           {props.gameCenterData && (
             <MyDrawer
+              header={<GameCenterInfoHeader data={props.gameCenterData} />}
               drawerState={props.spGameCenterInfoDrawerState}
               onChangeDrawerState={props.onChangeSpGameCenterInfoDrawerState}
             >
-              <GameCenterInfo data={props.gameCenterData} />
+              <GameCenterInfoBody data={props.gameCenterData} />
             </MyDrawer>
           )}
         </div>

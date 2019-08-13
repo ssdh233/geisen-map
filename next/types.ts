@@ -6,22 +6,38 @@ export type Info = {
   updateTime: Date;
 };
 
+export type NormalizedAddress = {
+  regionId: string;
+  fullAddress: string;
+  build: string;
+  number: string;
+  region: string;
+  town: string;
+};
+
 export type GameCenter = {
+  geo: Geo;
   name: string;
+  address: NormalizedAddress;
   infos: Info[];
-  games: { name: string; infos: Info[] }[];
+  games: {
+    name: string; // Enum?
+    infos: Info[];
+  }[];
 };
 
 export type GameCenterGeoInfo = {
-  id: string;
+  _id: string;
   geo: Geo;
   name: string;
+  description: string;
   games: string[]; // TODO Enum?
 };
 
 export type Geo = {
   lat: number;
   lng: number;
+  zoom?: number;
 };
 
 export type Filter = { [game: string]: boolean };
