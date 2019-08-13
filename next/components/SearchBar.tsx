@@ -134,7 +134,7 @@ function SearchBar(props: Props) {
             </IconButton>
             <InputBase
               className={classes.input}
-              placeholder="地名、駅名で検索"
+              placeholder="駅名で検索"
               inputProps={{ "aria-label": "" }}
               onKeyPress={event => {
                 if (event.key === "Enter") {
