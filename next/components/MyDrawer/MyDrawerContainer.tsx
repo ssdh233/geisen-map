@@ -8,6 +8,7 @@ import useScreenHeight from "../../utils/useScreenHeight";
 type Props = {
   drawerState: DrawerState;
   onChangeDrawerState: (drawerState: DrawerState) => void;
+  header?: ReactNode;
   children: ReactNode;
 };
 
@@ -30,9 +31,10 @@ function getPrevDrawerState(drawerState: DrawerState): DrawerState {
 function MyDrawerContainer(props: Props) {
   const screenHeight = useScreenHeight();
   const refObj = useRef({ startY: 0, isDragging: false });
+  const drawerBodyRef = useRef() as any;
   const paperRef = useRef() as any;
 
-  const { drawerState, ...rest } = props;
+  const { drawerState, onChangeDrawerState, children, ...rest } = props;
 
   useEffect(() => {
     function handleBodyTouchStart(event: TouchEvent) {
@@ -45,26 +47,31 @@ function MyDrawerContainer(props: Props) {
     }
 
     function handleBodyTouchMove(event: TouchEvent) {
+      const currentY = window.innerHeight - event.touches[0].clientY;
+      const dy = currentY - refObj.current.startY;
       if (refObj.current.isDragging) {
-        event.preventDefault();
+        if (drawerState === "open" && (drawerBodyRef.current.scrollTop > 0 || dy > 0)) {
+          refObj.current.startY = window.innerHeight - event.touches[0].clientY;
+          refObj.current.isDragging = true;
+        } else {
+          // XXX: not sure why it causes error
+          event.preventDefault();
 
-        const currentY = window.innerHeight - event.touches[0].clientY;
-        const dy = currentY - refObj.current.startY;
-
-        const transform = `${MY_DRAWER_TRANSFORM_TABLE(screenHeight)[drawerState]} translate(0, ${-1 * dy}px)`;
-        const drawerStyle = paperRef.current.style;
-        drawerStyle.webkitTransform = transform;
-        drawerStyle.transform = transform;
-        drawerStyle.transition = "";
-        drawerStyle.transitionDuration = "";
+          const transform = `${MY_DRAWER_TRANSFORM_TABLE(screenHeight)[drawerState]} translate(0, ${-1 * dy}px)`;
+          const drawerStyle = paperRef.current.style;
+          drawerStyle.webkitTransform = transform;
+          drawerStyle.transform = transform;
+          drawerStyle.transition = "";
+          drawerStyle.transitionDuration = "";
+        }
       }
     }
 
     function handleBodyTouchEnd(event: TouchEvent) {
-      if (refObj.current.isDragging) {
-        const currentY = window.innerHeight - event.changedTouches[0].clientY;
-        const dy = currentY - refObj.current.startY;
+      const currentY = window.innerHeight - event.changedTouches[0].clientY;
+      const dy = currentY - refObj.current.startY;
 
+      if (refObj.current.isDragging) {
         if (dy > 100) {
           props.onChangeDrawerState(getNextDrawerState(drawerState));
         } else if (dy < -100) {
@@ -101,6 +108,7 @@ function MyDrawerContainer(props: Props) {
 
   return (
     <MyDrawer
+      bodyRef={drawerBodyRef}
       PaperProps={{
         ref: handlePaperRef
       }}

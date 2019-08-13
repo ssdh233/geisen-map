@@ -14,10 +14,12 @@ export const MY_DRAWER_TRANSFORM_TABLE = (screenHeight: number) => ({
 });
 
 export type Props = {
+  bodyRef: any;
   drawerState: DrawerState;
   screenHeight: number;
   PaperProps: Object;
   onClose: () => void;
+  header?: ReactNode;
   children: ReactNode;
 };
 
@@ -29,27 +31,39 @@ const useStyles = makeStyles({
     transition: "transform",
     transitionDuration: "150ms",
     boxShadow: props.drawerState === "halfOpen" ? "0 -1px 2px rgba(0,0,0,0.3)" : "",
-    borderRadius:  props.drawerState === "halfOpen" ? "10px 10px 0px 0px" : ""
+    borderRadius: props.drawerState === "halfOpen" ? "10px 10px 0px 0px" : ""
   }),
   closeButton: {
     position: "absolute",
     left: 0,
     top: 0
-  }
+  },
+  header: {
+    height: 60
+  },
+  body: (props: Props) => ({
+    overflow: "scroll",
+    maxHeight: props.screenHeight - 60
+  })
 });
 
 function MyDrawer(props: Props) {
   const classes = useStyles(props);
-  const { children, drawerState, screenHeight, ...rest } = props;
+  const { children, bodyRef, drawerState, screenHeight, ...rest } = props;
 
   return (
     <Drawer classes={{ paper: cx(classes.drawer) }} variant="permanent" anchor="bottom" {...rest}>
-      {drawerState === "open" && (
-        <IconButton className={classes.closeButton} onClick={() => props.onClose()}>
-          <ExpandMoreIcon fontSize="large" />
-        </IconButton>
-      )}
-      {children}
+      <div className={classes.header}>
+        {drawerState === "open" && (
+          <IconButton className={classes.closeButton} onClick={() => props.onClose()}>
+            <ExpandMoreIcon fontSize="large" />
+          </IconButton>
+        )}
+        {props.header}
+      </div>
+      <div ref={bodyRef} className={classes.body}>
+        {children}
+      </div>
     </Drawer>
   );
 }

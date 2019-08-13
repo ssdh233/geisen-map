@@ -61,10 +61,22 @@ const popnCrawler = new Crawler({
         .text();
 
       let cabType = "";
-      if (raw.find(".wide")) {
+      if (
+        raw.find(".wide") &&
+        raw
+          .find(".wide")
+          .text()
+          .includes("×")
+      ) {
         cabType += `新筐体 ${raw.find(".wide").text()} `;
       }
-      if (raw.find(".standard")) {
+      if (
+        raw.find(".standard") &&
+        raw
+          .find(".standard")
+          .text()
+          .includes("×")
+      ) {
         cabType += `旧筐体 ${raw.find(".standard").text()} `;
       }
 

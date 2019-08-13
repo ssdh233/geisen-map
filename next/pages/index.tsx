@@ -61,8 +61,14 @@ function IndexPage(props: Prop) {
         const res = await fetch(`${API_URL}/gamecenter/${gameCenterId}`);
         const data = await res.json();
         setGameCenterData(data);
+        setSpGameCenterInfoDrawerState("halfOpen");
+        setFilterExpanded(false);
       } else {
         setGameCenterData(null);
+        setSpGameCenterInfoDrawerState("closed");
+        if (!isSP) {
+          setFilterExpanded(true);
+        }
       }
     }
 
@@ -119,18 +125,8 @@ function IndexPage(props: Prop) {
         viewport={viewport}
         onChangeViewport={handleChangeViewport}
         gamecenters={gamecenters}
-        onMarkerClick={id => {
-          handleChangeGameCenter(id);
-          setFilterExpanded(false);
-          setSpGameCenterInfoDrawerState("halfOpen");
-        }}
-        onMarkerUnselect={() => {
-          handleChangeGameCenter(null);
-          if (!isSP) {
-            setFilterExpanded(true);
-          }
-          setSpGameCenterInfoDrawerState("closed");
-        }}
+        onMarkerClick={id => handleChangeGameCenter(id)}
+        onMarkerUnselect={() => handleChangeGameCenter(null)}
       />
       <MainSide
         gameCenterId={gameCenterId as string}
