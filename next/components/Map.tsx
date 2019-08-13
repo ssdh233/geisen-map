@@ -70,10 +70,6 @@ function MyMap(props: Props) {
 
     let geoSuccess = function(position: { coords: { latitude: number; longitude: number } }) {
       startPos = position;
-      props.onChangeViewport({
-        center: [startPos.coords.latitude, startPos.coords.longitude],
-        zoom: 14
-      });
       setUserLocation([startPos.coords.latitude, startPos.coords.longitude]);
     };
     let geoError = function(error: { code: number }) {
@@ -88,7 +84,11 @@ function MyMap(props: Props) {
     navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geoOptions);
   }
 
-  useEffect(() => requestUserLocation(), []);
+  useEffect(() => {
+    requestUserLocation();
+    const id = setInterval(() => requestUserLocation(), 3000);
+    return () => clearInterval(id);
+  }, []);
   const classes = useStyles();
 
   return (
