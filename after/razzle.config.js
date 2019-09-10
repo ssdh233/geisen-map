@@ -1,5 +1,18 @@
-'use strict';
+"use strict";
 
 module.exports = {
-    plugins: ['typescript'],
+  plugins: [
+    {
+      name: "typescript",
+      options: {
+        useBabel: true,
+        forkTsChecker: {
+          tsconfig: "./tsconfig.json",
+          tslint: undefined,
+          watch: "./src",
+          typeCheck: true
+        }
+      }
+    }
+  ]
 };

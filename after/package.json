@@ -10,11 +10,16 @@
   },
   "dependencies": {
     "@jaredpalmer/after": "latest",
+    "@material-ui/core": "^4.4.1",
+    "@material-ui/icons": "^4.4.1",
+    "downshift": "^3.2.14",
     "express": "^4.16.2",
+    "leaflet": "^1.5.1",
     "razzle": "^2.4.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-helmet": "^5.2.0",
+    "react-leaflet": "^2.4.0",
     "react-router-dom": "^4.2.2"
   },
   "devDependencies": {
@@ -22,8 +27,9 @@
     "@types/history": "^4.7.2",
     "@types/jest": "^22.2.3",
     "@types/node": "9.6.6",
-    "@types/react": "^16.3.13",
-    "@types/react-dom": "^16.0.5",
+    "@types/react": "^16.9.2",
+    "@types/react-dom": "^16.9.0",
+    "@types/react-leaflet": "^2.4.0",
     "@types/react-router-dom": "^4.2.6",
     "@types/webpack-env": "^1.13.6",
     "razzle-plugin-typescript": "^2.4.0",

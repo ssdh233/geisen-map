@@ -12,6 +12,14 @@ const routes: RouteProps[] = [
     }),
   },
   {
+    path: '/map',
+    exact: true,
+    component: asyncComponent({
+      loader: () => import('./components/MapPage'), // required
+      Placeholder
+    }),
+  },
+  {
     path: '/about',
     exact: true,
     component: asyncComponent({
