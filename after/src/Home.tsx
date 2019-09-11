@@ -31,7 +31,7 @@ class Home extends React.Component<IHomeProps> {
         <div><Link to="/about">About -></Link></div>
         <div><Link to="/user/123">User 1 -></Link></div>
         <div><Link to="/user/456">User 2 -></Link></div>
-        <div><Link to="/user/789">User 3 -></Link></div>
+        <div><Link to="/map">Map Page</Link></div>
       </div>
     );
   }

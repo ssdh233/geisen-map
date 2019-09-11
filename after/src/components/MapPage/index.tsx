@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Viewport } from "react-leaflet";
 import Snackbar from "@material-ui/core/Snackbar";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
+import { Helmet } from "react-helmet";
 
 import { DrawerState } from "../../components/MyDrawer";
 import { Filter, GameCenterGeoInfo, GameCenter } from "../../types";
@@ -17,7 +18,7 @@ type Prop = {
 };
 
 // TODO
-const API_URL = "http://192.168.1.6:4000";
+const API_URL = "http://localhost:4000";
 
 const defaultViewport = {
   center: [38.5548225, 135.8920016],
@@ -61,13 +62,14 @@ function MapPage(props: Prop) {
     props.history.push(`/?${newQuery}`);
   }
 
+  const gameCenterId = "1231"; // TODO
+
   return (
-    <div>
-      <Head>
+    <div id="test">
+      <Helmet>
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" />
-      </Head>
-      <style jsx global>
-        {`
+        <style>
+          {`
           h1,
           h2,
           h3 {
@@ -88,7 +90,8 @@ function MapPage(props: Prop) {
             height: 100%;
           }
         `}
-      </style>
+        </style>
+      </Helmet>
       <Map
         gameCenterId={gameCenterId as string}
         viewport={viewport}
@@ -111,9 +114,12 @@ function MapPage(props: Prop) {
 }
 
 function filterGamecenters(gamecenters: GameCenterGeoInfo[], filter: Filter): GameCenterGeoInfo[] {
-  return gamecenters.filter(gamecenter => {
-    return gamecenter.games.some(game => filter[game]);
-  });
+  return (
+    gamecenters &&
+    gamecenters.filter(gamecenter => {
+      return gamecenter.games.some(game => filter[game]);
+    })
+  );
 }
 
 function getVisibleGamecenters(gamecenters: GameCenterGeoInfo[], viewport: Viewport): GameCenterGeoInfo[] {

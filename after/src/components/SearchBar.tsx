@@ -13,7 +13,7 @@ import reactLeaflet from "react-leaflet";
 import { Geo } from "../types";
 
 // TODO
-const API_URL = "http://192.168.1.6:4000";
+const API_URL = "http://localhost:4000";
 
 const useStyles = makeStyles({
   root: {
