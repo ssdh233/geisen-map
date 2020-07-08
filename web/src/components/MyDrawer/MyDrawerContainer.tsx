@@ -1,4 +1,4 @@
-import { ReactNode, useRef, useEffect, useCallback } from "react";
+import React, { ReactNode, useRef, useEffect, useCallback } from "react";
 import ReactDOM from "react-dom";
 
 import MyDrawer, { MY_DRAWER_TRANSFORM_TABLE } from "./MyDrawer";
@@ -100,11 +100,11 @@ function MyDrawerContainer(props: Props) {
     };
     // it's very very very important to put drawerState here. otherwise function like handleBodyTouchStart
     // will not be updated when drawerState is changed.
-  }, [drawerState, screenHeight]);
+  }, [drawerBodyRef, drawerState, paperRef, props, screenHeight]);
 
   const handlePaperRef = useCallback(instance => {
     paperRef.current = ReactDOM.findDOMNode(instance);
-  }, []);
+  }, [paperRef]);
 
   return (
     <MyDrawer

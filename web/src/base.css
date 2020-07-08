@@ -1,0 +1,19 @@
+h1,
+h2,
+h3 {
+  margin: 0;
+}
+
+ul {
+  padding-left: 20px;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+}
+.leaflet-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}

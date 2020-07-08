@@ -1,3 +1,4 @@
+import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import FormControl from "@material-ui/core/FormControl";
 import FormGroup from "@material-ui/core/FormGroup";
@@ -9,7 +10,7 @@ import IconButton from "@material-ui/core/IconButton";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 
 import { NAME_MAP } from "../constants/game";
-import { stringToFilter } from "../utils/filter";
+import { stringToFilter } from "../utils/useFilter";
 import cx from "../utils/classname";
 import { Filter } from "../types";
 
@@ -27,9 +28,9 @@ type StyleParam = { isSP: boolean; expanded: boolean };
 const useStyles = makeStyles({
   container: ({ isSP, expanded }: StyleParam) => ({
     overflow: "hidden",
-    maxHeight: expanded ? (isSP ? 500 : 1000) : 48,
+    maxHeight: expanded ? (isSP ? 500 : 1000) : 20,
     padding: "12px 16px",
-    transition: "max-height 150ms"
+    transition: "max-height 150ms",
   }),
   expander: {
     padding: 0,
@@ -38,38 +39,38 @@ const useStyles = makeStyles({
     fontSize: "1rem",
     display: "flex",
     alignItems: "center",
-    width: "100%"
+    width: "100%",
   },
   filterIcon: {
-    marginRight: 8
+    marginRight: 8,
   },
   label: {
     textAlign: "left",
-    flexGrow: 1
+    flexGrow: 1,
   },
   expandIconContainer: {
     width: 48,
     height: 24,
     display: "flex",
     alignItems: "center",
-    position: "relative"
+    position: "relative",
   },
   expandIconButton: {
-    position: "absolute"
+    position: "absolute",
   },
   expandIcon: {
-    transition: "transform 150ms"
+    transition: "transform 150ms",
   },
   expandIconRotated: {
-    transform: "rotate(180deg)"
+    transform: "rotate(180deg)",
   },
   checkBoxContainer: ({ isSP }: StyleParam) => ({
     marginTop: 8,
-    width: "100vw",
+    width: isSP ? "100vw" : undefined,
     maxHeight: isSP ? "50vh" : undefined,
-    overflow: "scroll",
-    display: "block"
-  })
+    overflow: isSP ? "scroll" : "auto",
+    display: "block",
+  }),
 });
 
 function GameFilter(props: Props) {
@@ -84,7 +85,7 @@ function GameFilter(props: Props) {
           onChange={() =>
             props.onChange({
               ...props.filter,
-              [gameName]: !props.filter[gameName]
+              [gameName]: !props.filter[gameName],
             })
           }
           value={gameName}
@@ -95,11 +96,16 @@ function GameFilter(props: Props) {
     />
   );
 
-  const hasSomthingSelected = Object.keys(props.filter).some(gameName => props.filter[gameName]);
+  const hasSomthingSelected = Object.keys(props.filter).some(
+    (gameName) => props.filter[gameName]
+  );
 
   return (
     <div className={classes.container}>
-      <div className={classes.expander} onClick={() => props.onChangeExpanded(!props.expanded)}>
+      <div
+        className={classes.expander}
+        onClick={() => props.onChangeExpanded(!props.expanded)}
+      >
         <FilterListIcon className={classes.filterIcon} />
         <div className={classes.label}>機種絞り込み</div>
         <div className={classes.expandIconContainer}>
@@ -107,8 +113,9 @@ function GameFilter(props: Props) {
             <ExpandMoreIcon
               className={cx(
                 classes.expandIcon,
-                (props.expandedIconState !== undefined ? props.expandedIconState : props.expanded) &&
-                  classes.expandIconRotated
+                (props.expandedIconState !== undefined
+                  ? props.expandedIconState
+                  : props.expanded) && classes.expandIconRotated
               )}
             />
           </IconButton>
@@ -121,14 +128,18 @@ function GameFilter(props: Props) {
               control={
                 <Checkbox
                   checked={hasSomthingSelected}
-                  onChange={() => props.onChange(stringToFilter(hasSomthingSelected ? "none" : "all"))}
+                  onChange={() =>
+                    props.onChange(
+                      stringToFilter(hasSomthingSelected ? "none" : "all")
+                    )
+                  }
                   value="selectAll"
                   color="primary"
                 />
               }
               label={hasSomthingSelected ? "すべて解除" : "すべて選択"}
             />
-            {Object.keys(NAME_MAP).map(gameName => (
+            {Object.keys(NAME_MAP).map((gameName) => (
               <FilterCheckBox key={gameName} gameName={gameName} />
             ))}
           </FormGroup>

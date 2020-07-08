@@ -12,3 +12,8 @@ export function toQuery(queryObj: QueryObject): string {
 
   return result;
 }
+
+export function parseQuery(query: string): QueryObject {
+  const urlParams = new URLSearchParams(query);
+  return Object.fromEntries(urlParams);
+}

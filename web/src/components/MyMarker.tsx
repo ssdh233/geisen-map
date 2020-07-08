@@ -1,8 +1,9 @@
+import React from 'react';
 import { useRef, useEffect } from "react";
 import { Marker, MarkerProps } from "react-leaflet";
 
 type Props = {
-  isOpen: boolean;
+  isOpen?: boolean;
   onClick: any;
 } & MarkerProps;
 
