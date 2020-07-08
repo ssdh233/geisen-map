@@ -11,12 +11,12 @@ export type Info = {
 };
 
 export type NormalizedAddress = {
-  regionId: string;
   fullAddress: string;
-  build: string;
+  prefecture: string;
+  city: string;
+  ward: string;
   number: string;
-  region: string;
-  town: string;
+  build: string;
 };
 
 export type GameCenter = {

@@ -4,10 +4,13 @@ import GeoInfoModel from "../models/geoInfo";
 const geoInfoApi = (app: express.Express) => {
   app.get("/geoinfo", async (req, res) => {
     if (req.query.q) {
-      let result = await GeoInfoModel.find({ text: { $regex: new RegExp(`.*${req.query.q}.*`) } }, { _id: 0 });
+      let result = await GeoInfoModel.find(
+        { text: { $regex: new RegExp(`.*${req.query.q}.*`) } },
+        { _id: 0 }
+      );
 
       result = result.sort((a, b) => {
-        if (a.text.startsWith(req.query.q)) {
+        if (typeof req.query.q === "string" && a.text.startsWith(req.query.q)) {
           return -1;
         }
         return a.text.localeCompare(b.text);
