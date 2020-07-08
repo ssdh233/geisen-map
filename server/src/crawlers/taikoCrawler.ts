@@ -5,7 +5,7 @@ require("dotenv").config();
 
 const taikoCrawler = new Crawler({
   sourceId: "taiko_official",
-  urls: Array(47) // max 47
+  urls: Array(5) // max 47
     .fill(0)
     .map((_, i) => {
       let id = "" + (i + 1);
@@ -18,16 +18,13 @@ const taikoCrawler = new Crawler({
 
     const startIndex = scriptContent.indexOf("var locations =");
     const endIndex = scriptContent.indexOf("];", startIndex);
-    console.log("scriptContent", scriptContent);
 
     const locationDefinitionCode = scriptContent.substring(startIndex, endIndex + 2);
     const sandbox: { locations: any[] } = { locations: [] };
-    console.log("locationDefinitionCode", locationDefinitionCode);
 
     vm.createContext(sandbox);
     vm.runInContext(locationDefinitionCode, sandbox);
 
-    console.log("getList", sandbox.locations);
     return sandbox.locations;
   },
   getItem: raw => ({
