@@ -95,7 +95,8 @@ export default class Crawler {
           return { ...rawItem, geo: rawItem.geo, address };
         } else {
           // if there is no geo information
-          const addressTextWithoutBuilding = address.region + address.town + address.number;
+          // const addressTextWithoutBuilding = address.region + address.town + address.number;
+          const addressTextWithoutBuilding = address.fullAddress; // TODO
           const geo = await getGeoFromText(addressTextWithoutBuilding);
           return { ...rawItem, geo, address };
         }
