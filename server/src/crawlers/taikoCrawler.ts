@@ -18,16 +18,13 @@ const taikoCrawler = new Crawler({
 
     const startIndex = scriptContent.indexOf("var locations =");
     const endIndex = scriptContent.indexOf("];", startIndex);
-    console.log("scriptContent", scriptContent);
 
     const locationDefinitionCode = scriptContent.substring(startIndex, endIndex + 2);
     const sandbox: { locations: any[] } = { locations: [] };
-    console.log("locationDefinitionCode", locationDefinitionCode);
 
     vm.createContext(sandbox);
     vm.runInContext(locationDefinitionCode, sandbox);
 
-    console.log("getList", sandbox.locations);
     return sandbox.locations;
   },
   getItem: raw => ({
