@@ -8,6 +8,7 @@ import {
   Popup,
   ZoomControl,
   CircleMarker,
+  Viewport
 } from "react-leaflet";
 import Fab from "@material-ui/core/Fab";
 import { makeStyles } from "@material-ui/core/styles";
@@ -150,7 +151,7 @@ function MyMap(props: Props) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {!isSP && <ZoomControl position="bottomright" />}
-        {filterGamecenters(gamecenters, filter).map(({ _id, geo, name }) => {
+        {getVisibleGamecenters(filterGamecenters(gamecenters, filter), viewport).map(({ _id, geo, name }) => {
           return (
             <MyMarker
               key={_id}
@@ -183,6 +184,28 @@ function filterGamecenters(
   return gamecenters.filter((gamecenter) => {
     return gamecenter.games.some((game) => filter[game]);
   });
+}
+
+function getVisibleGamecenters(gamecenters: GameCenterGeoInfo[], viewport: Viewport): GameCenterGeoInfo[] {
+  if (!viewport.center || !viewport.zoom) return [];
+  if (viewport.zoom && viewport.zoom < 10) return [];
+  const [lat, lng] = viewport.center;
+  const rangeRadio = 2 ** viewport.zoom;
+  let latRange = 2 ** 10 / rangeRadio;
+  let lngRnage = 2 ** 10 / rangeRadio;
+
+  let filtered = gamecenters;
+
+  while (filtered.length > 300) {
+    filtered = gamecenters.filter(({ geo }) => {
+      return Math.abs(geo.lat - lat) < latRange && Math.abs(geo.lng - lng) < lngRnage;
+    });
+
+    latRange /= 2;
+    lngRnage /= 2;
+  }
+
+  return filtered;
 }
 
 export default MyMap;
