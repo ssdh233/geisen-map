@@ -7,6 +7,7 @@ const geoInfoApi = (app: express.Express) => {
       let result = await GeoInfoModel.find({ text: { $regex: new RegExp(`.*${req.query.q}.*`) } }, { _id: 0 });
 
       result = result.sort((a, b) => {
+        // @ts-ignore TODO
         if (a.text.startsWith(req.query.q)) {
           return -1;
         }

@@ -8,7 +8,10 @@ import { getGeoFromText } from "../utils/googleMapApi";
 import normalizeAddress from "../utils/address";
 import GameCenterModel, { GameCenter, Info } from "../models/gameCenter";
 
-export type GameCenterWithRawAddress = Pick<GameCenter, Exclude<keyof GameCenter, "address" | "geo">> & {
+export type GameCenterWithRawAddress = Pick<
+  GameCenter,
+  Exclude<keyof GameCenter, "address" | "geo">
+> & {
   rawAddress: string;
   geo?: { lat: number; lng: number };
 };
@@ -22,27 +25,35 @@ export default class Crawler {
   gameSourceId: string;
   updateTime: Date;
   urls: string[];
+  crawlerCount: number;
+  googleMapApiCount: number;
   fetchHeaders: any;
 
   getPaginatedUrls: (url: string) => string[] | Promise<string[]>;
   getList: (page: CheerioStatic) => any[];
-  getItem: (item: any, cheerioSelector: Cheerio) => GameCenterWithRawAddress | Promise<GameCenterWithRawAddress> | null;
+  getItem: (
+    item: any,
+    cheerioSelector: Cheerio
+  ) => GameCenterWithRawAddress | Promise<GameCenterWithRawAddress> | null;
 
   constructor({
     sourceId,
     gameSourceId,
     urls,
-    getPaginatedUrls = url => [url],
+    getPaginatedUrls = (url) => [url],
     getList,
     getItem,
-    fetchHeaders = {}
+    fetchHeaders = {},
   }: {
     sourceId: string;
     gameSourceId?: string;
     urls: string[];
     getPaginatedUrls?: (url: string) => string[] | Promise<string[]>;
     getList: (html: CheerioStatic) => any[];
-    getItem: (item: any, cheerioSelector: Cheerio) => GameCenterWithRawAddress | Promise<GameCenterWithRawAddress>;
+    getItem: (
+      item: any,
+      cheerioSelector: Cheerio
+    ) => GameCenterWithRawAddress | Promise<GameCenterWithRawAddress>;
     fetchHeaders?: any;
   }) {
     this.sourceId = sourceId;
@@ -52,18 +63,22 @@ export default class Crawler {
     this.getList = getList;
     this.getItem = getItem;
     this.fetchHeaders = fetchHeaders;
+    this.crawlerCount = 0;
+    this.googleMapApiCount = 0;
 
     this.updateTime = new Date();
   }
 
   // fetch page with header and try to find the right encoding to decode
   static async fetchPage(url: string, headers?: any): Promise<string> {
-    const htmlBuffer = await fetch(url, { headers }).then(res => res.arrayBuffer());
+    const htmlBuffer = await fetch(url, { headers }).then((res) =>
+      res.arrayBuffer()
+    );
     const htmlUnit8Array = new Uint8Array(htmlBuffer);
     const unicodeArray = Encoding.convert(htmlUnit8Array, {
       to: "UNICODE",
       from: Encoding.detect(htmlUnit8Array),
-      type: "array"
+      type: "array",
     });
 
     // @ts-ignore we know unicodeArray is always number[]
@@ -76,14 +91,14 @@ export default class Crawler {
       ...item,
       url,
       sourceId,
-      updateTime: this.updateTime
+      updateTime: this.updateTime,
     });
 
     const html = await Crawler.fetchPage(url, this.fetchHeaders);
 
     const $ = cheerio.load(html);
     const items: (GameCenter | null)[] = await Promise.all(
-      this.getList($).map(async item => {
+      this.getList($).map(async (item) => {
         const rawItem = await this.getItem(item, $(item));
         if (!rawItem) return null;
 
@@ -95,35 +110,50 @@ export default class Crawler {
           return { ...rawItem, geo: rawItem.geo, address };
         } else {
           // if there is no geo information
-          const addressTextWithoutBuilding = address.region + address.town + address.number;
+          // const addressTextWithoutBuilding =
+          //   address.region + address.town + address.number;
+          const addressTextWithoutBuilding = address.fullAddress;
+          this.googleMapApiCount++;
           const geo = await getGeoFromText(addressTextWithoutBuilding);
-          return { ...rawItem, geo, address };
+          if (geo && geo.lat && geo.lng) return { ...rawItem, geo, address };
         }
       })
     );
 
-    console.log("crawling:", url, "results:", items.length);
     // Add crawler info
-    return items
-      .filter(x => x)
-      .map(gameCenterItem => ({
+    const results = items
+      .filter((x) => x)
+      .map((gameCenterItem) => ({
         ...gameCenterItem,
         infos: gameCenterItem.infos.map(addAdditionInfo(this.sourceId)),
-        games: gameCenterItem.games.map(gameItem => ({
+        games: gameCenterItem.games.map((gameItem) => ({
           ...gameItem,
-          infos: gameItem.infos.map(addAdditionInfo(this.gameSourceId))
-        }))
+          infos: gameItem.infos.map(addAdditionInfo(this.gameSourceId)),
+        })),
       }));
+
+    this.crawlerCount++;
+    console.log(
+      `(${this.crawlerCount}/${this.urls.length}) Crawled:`,
+      url,
+      "results:",
+      items.length
+    );
+
+    return results;
   }
 
   async start() {
-    const db = dbConnect();
 
     const that = this;
-    const paginatedUrls = await Promise.all(this.urls.map(this.getPaginatedUrls));
+    const paginatedUrls = await Promise.all(
+      this.urls.map(this.getPaginatedUrls)
+    );
     this.urls = [].concat(...paginatedUrls);
 
-    this.urls.forEach(url => console.log("target urls:", url));
+    this.urls.forEach((url) => console.log("target url:", url));
+
+    console.log("========= Starting crawling in parallel =========");
 
     const promises = [];
     for (let i = 0; i < this.urls.length; i++) {
@@ -134,37 +164,56 @@ export default class Crawler {
     const flatResults = ([] as GameCenter[]).concat(...results);
 
     console.log("flatResults.length:", flatResults.length);
+    console.log("this.googleMapApiCount:", this.googleMapApiCount);
+    console.log("========= Saving results into database =========");
+
+    const db = dbConnect();
 
     let newGameCenterCount = 0;
-    // TODO remove all information from that source if there are results from same source (how to check?)
     for (let i = 0; i < flatResults.length; i++) {
       const gameCenterItem = flatResults[i];
+      console.log('started findSameGameCenter')
 
       // TODO change here
-      let gameCenterEntity = await GameCenterModel.findSameGameCenter(gameCenterItem);
+      let gameCenterEntity = await GameCenterModel.findSameGameCenter(
+        gameCenterItem
+      );
+      console.log('finished findSameGameCenter')
       if (!gameCenterEntity) {
         console.log("New Game Center!", gameCenterItem);
         newGameCenterCount++;
         gameCenterEntity = new GameCenterModel({
           ...gameCenterItem,
           infos: [],
-          games: []
+          games: [],
         });
       }
 
       // TODO try to move this part to schema?
       // clear previous info from this source
-      gameCenterEntity.infos = gameCenterEntity.infos.filter(info => info.sourceId !== that.sourceId);
+      gameCenterEntity.infos = gameCenterEntity.infos.filter(
+        (info) => info.sourceId !== that.sourceId
+      );
       // add new info
-      gameCenterEntity.infos = [...gameCenterEntity.infos, ...gameCenterItem.infos];
-      gameCenterItem.games.forEach(gameItem => {
+      gameCenterEntity.infos = [
+        ...gameCenterEntity.infos,
+        ...gameCenterItem.infos,
+      ];
+      gameCenterItem.games.forEach((gameItem) => {
         let currentGame;
-        let index = gameCenterEntity.games.findIndex(x => x.name === gameItem.name);
+        let index = gameCenterEntity.games.findIndex(
+          (x) => x.name === gameItem.name
+        );
         if (index >= 0) {
           let currentGameInfos = gameCenterEntity.games[index].infos;
           // clear previous info from this source
-          currentGameInfos = currentGameInfos.filter(info => info.sourceId !== that.gameSourceId);
-          gameCenterEntity.games[index].infos = [...currentGameInfos, ...gameItem.infos];
+          currentGameInfos = currentGameInfos.filter(
+            (info) => info.sourceId !== that.gameSourceId
+          );
+          gameCenterEntity.games[index].infos = [
+            ...currentGameInfos,
+            ...gameItem.infos,
+          ];
         } else {
           currentGame = { name: gameItem.name, infos: gameItem.infos };
           gameCenterEntity.games.push(currentGame);
@@ -172,9 +221,20 @@ export default class Crawler {
       });
 
       await gameCenterEntity.save();
+      console.log(
+        `(${i + 1}/${flatResults.length}) Finish processing: ${
+          gameCenterItem.name
+        }`
+      );
     }
-    console.log(`Saved ${flatResults.length} Items, new game center: ${newGameCenterCount}`);
+    console.log(
+      `Saved ${flatResults.length} Items, new game center: ${newGameCenterCount}`
+    );
 
     db.close();
   }
 }
+
+process.on("uncaughtException", (err: any, origin: any) => {
+  console.error("uncaughtException", err, origin);
+});
