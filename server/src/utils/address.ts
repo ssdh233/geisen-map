@@ -2,14 +2,17 @@ import fetch from "node-fetch";
 import sleep from "./sleep";
 import { NormalizedAddress } from "../models/gameCenter";
 
-const ADDRESS_NORMALIZE_API_URL = "https://api.loctouch.com/v1/geo/address_normalize?address=";
+const ADDRESS_NORMALIZE_API_URL =
+  "https://api.loctouch.com/v1/geo/address_normalize?address=";
 const RETRY_LIMIT = 10;
 
-export default async function normalizeAddress(rawAddress: string): Promise<NormalizedAddress> {
+export default async function normalizeAddress(
+  rawAddress: string
+): Promise<NormalizedAddress> {
   // remove space
   let address = rawAddress.replace(/\s|　/g, "");
 
-  return
+  return { fullAddress: address };
 
   // const url = ADDRESS_NORMALIZE_API_URL + encodeURIComponent(address);
   // let resJson;

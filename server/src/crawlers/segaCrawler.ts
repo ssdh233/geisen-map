@@ -15,7 +15,7 @@ const segaCrawler = (gameId: string, gameName: string) =>
         while (id.length < 2) id = "0" + id;
         return `https://location.am-all.net/alm/location?gm=${gameId}&ct=1000&at=${i}`;
       }),
-    getList: $ => Array.from($(".store_list > li")),
+    getList: ($) => Array.from($(".store_list > li")),
     getItem: async (_, raw) => {
       const onclickScript = raw.find(".bt_details").attr("onclick");
       let [, tenpoUrl] = onclickScript.match(/location\.href='(.*?)';/);
@@ -53,17 +53,26 @@ const segaCrawler = (gameId: string, gameName: string) =>
         geo: { lat, lng },
         name: name,
         rawAddress: address,
-        infos: [businessHour && { infoType: "businessHour", text: businessHour }].filter(x => x),
-        games: [{ name: gameName, infos: [{ infoType: "main", text: "" }] }]
+        infos: [
+          businessHour && { infoType: "businessHour", text: businessHour },
+        ].filter((x) => x),
+        games: [{ name: gameName, infos: [{ infoType: "main", text: "" }] }],
       };
-    }
+    },
   });
 
 async function start() {
-  let SEGA_INFO = [["96", "maimai"], ["93", "wacca"], ["88", "ongeki"], ["58", "chuni"], ["34", "diva"]];
+  let SEGA_INFO = [
+    ["96", "maimai"],
+    ["93", "wacca"],
+    ["88", "ongeki"],
+    ["58", "chuni"],
+    ["34", "diva"],
+  ];
 
   for (let i = 0; i < SEGA_INFO.length; i++) {
     const [key, name] = SEGA_INFO[i];
+    console.log(`========= crawler for ${name} =========`);
     await segaCrawler(key, name).start();
   }
 }

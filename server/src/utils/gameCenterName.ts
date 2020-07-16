@@ -20,11 +20,11 @@ export default function normalizeGameCenterName(rawName: string, address: Normal
   // remove general term
   name = name.replace(/店|ゲーム|アミュージアム|アミューズメント/g, "");
 
-  // TODO: get closest station name from somewhere
-  name = stripCommonSubstring(name, address.region);
-  name = stripCommonSubstring(name, address.town);
+  // // TODO: get closest station name from somewhere
+  // name = stripCommonSubstring(name, address.region);
+  // name = stripCommonSubstring(name, address.town);
 
-  console.log("normalizeGameCenterName", rawName, name);
+  // console.log("normalizeGameCenterName", rawName, name);
   return name;
 }
 
