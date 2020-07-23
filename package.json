@@ -8,5 +8,8 @@
   "workspaces": [
     "server",
     "web"
-  ]
+  ],
+  "scripts": {
+    "heroku-postbuild": "yarn workspaces run build"
+  }
 }
