@@ -1880,7 +1880,7 @@
   resolved "https://registry.yarnpkg.com/@types/string-similarity/-/string-similarity-3.0.0.tgz#12b655f1aab0156049657a4e9287caf3e6718d93"
   integrity sha512-vhHkPKxl0cudrbxr5Dog1HVgUGXtmyYP95qy1da/h5gFEzIqDMN/+SjJAS7/6DEAdeI+AJQX8zrdWXL3wP4FRA==
 
-"@types/testing-library__dom@*":
+"@types/testing-library__dom@*", "@types/testing-library__dom@^7.5.0":
   version "7.5.0"
   resolved "https://registry.yarnpkg.com/@types/testing-library__dom/-/testing-library__dom-7.5.0.tgz#e0a00dd766983b1d6e9d10d33e708005ce6ad13e"
   integrity sha512-mj1aH4cj3XUpMEgVpognma5kHVtbm6U6cHZmEFzCRiXPvKkuHrFr3+yXdGLXvfFRBaQIVshPGHI+hGTOJlhS/g==

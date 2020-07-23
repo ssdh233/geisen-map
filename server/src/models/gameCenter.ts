@@ -69,11 +69,11 @@ const SEARCH_RANGE = 0.01;
 GameCenterSchema.statics.findSameGameCenter = async function (
   gameCenter: GameCenter
 ): Promise<GameCenter | null> {
-  console.log(
-    "================================================================================"
-  );
-  console.log("findSameGameCenter:", gameCenter.name);
-  console.log("search condition", gameCenter.geo.lat, gameCenter.geo.lng);
+  // console.log(
+  //   "================================================================================"
+  // );
+  // console.log("findSameGameCenter:", gameCenter.name);
+  // console.log("search condition", gameCenter.geo.lat, gameCenter.geo.lng);
   const results = await this.find({
     "geo.lat": {
       $gt: gameCenter.geo.lat - SEARCH_RANGE,
@@ -84,28 +84,28 @@ GameCenterSchema.statics.findSameGameCenter = async function (
       $lt: gameCenter.geo.lng + SEARCH_RANGE,
     },
   });
-  console.log("results.length", results.length);
+  // console.log("results.length", results.length);
 
   if (!results) return null;
 
   for (let i = 0; i < results.length; i++) {
     const isSame = isSameGameCenter(gameCenter, results[i]);
-    console.log("========================================");
-    console.log(gameCenter);
+    // console.log("========================================");
+    // console.log(gameCenter);
 
-    console.log("==========");
-    console.log(results[i]);
+    // console.log("==========");
+    // console.log(results[i]);
 
-    console.log("==========");
-    console.log({ isSame, A: gameCenter.name, B: results[i].name });
-    console.log("========================================");
+    // console.log("==========");
+    // console.log({ isSame, A: gameCenter.name, B: results[i].name });
+    // console.log("========================================");
 
     if (isSame) {
-      console.log("found:", gameCenter.name, results[i].name);
+      // console.log("found:", gameCenter.name, results[i].name);
       return results[i];
     }
   }
-  console.log("fail to find:", gameCenter.name);
+  // console.log("fail to find:", gameCenter.name);
   return null;
 };
 
