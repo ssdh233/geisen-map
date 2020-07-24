@@ -3,22 +3,22 @@
 ```
 mongodump -d ${db} -o ${output}
 mongorestore --host=${host} --port=${port} -u ${user} -p ${password} --db ${db} ${path_to_bson}
-```
 
-#### heroku buildpack (find someway to define it in codebase)
-
-```
-heroku buildpacks:set https://github.com/heroku/heroku-buildpack-nodejs -a ${app}
-heroku buildpacks:add -i 1 https://github.com/lstoll/heroku-buildpack-monorepo -a ${app}
+# for atlas, check "Command Line Tools"
 ```
 
 #### TODOs
 
-1. ~~recreate web app by using cra & react-router instead of next~~
-2. server data update
-3. deploy
-4. SEO with dynamic rendering
-
+* (S) server data update
+  * (A) crawler automation
+* (B) SEO dynamic rendering
+* (A) user
+  * checkout
+    * data editing
+* search enhancement: search by area/gamecenter
+* statistic pages
+  * gamecenter/game count
+  * user edit count
 
 (weekly)
 crawler collect data -> crawler create/remove gamecenter info data
