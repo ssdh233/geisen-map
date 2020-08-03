@@ -11,12 +11,13 @@ export type Info = {
 };
 
 export type NormalizedAddress = {
-  // regionId: string;
+  prefecture: string;
+  city: string;
+  ward: string;
+  town: string;
+  number: string;
+  build: string;
   fullAddress: string;
-  // build: string;
-  // number: string;
-  // region: string;
-  // town: string;
 };
 
 export type GameCenter = {
@@ -113,10 +114,6 @@ function isSameGameCenter(
   gameCenterA: GameCenter,
   gameCenterB: GameCenter
 ): boolean {
-  // if (gameCenterA.address.regionId !== gameCenterB.address.regionId) {
-  //   return false;
-  // }
-
   const normalizeNameA = normalizeGameCenterName(
     gameCenterA.name,
     gameCenterA.address

@@ -31,3 +31,7 @@ user level:
 1 can update data after checkout
 2 can close/change gamecenter's core information after checkout 10 times?
   close -> need 5 or more users to confirm
+
+#### Action tree
+* trying to normalize address (again!) and recrawl data
+* think of a data-model which can utilize both crawler's and user's data
