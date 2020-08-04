@@ -21,14 +21,18 @@ export default function normalizeGameCenterName(rawName: string, address: Normal
   name = name.replace(/店|ゲーム|アミュージアム|アミューズメント/g, "");
 
   // // TODO: get closest station name from somewhere
-  // name = stripCommonSubstring(name, address.region);
-  // name = stripCommonSubstring(name, address.town);
+  name = stripCommonSubstring(name, address.prefecture);
+  name = stripCommonSubstring(name, address.city);
+  name = stripCommonSubstring(name, address.ward);
+  name = stripCommonSubstring(name, address.town);
 
   // console.log("normalizeGameCenterName", rawName, name);
   return name;
 }
 
 export function stripCommonSubstring(strA: string, strB: string) {
+  if (!strA || !strB) return strA;
+
   let result = strA;
   let commonSubstring = longestCommonSubstring(result, strB);
   while (commonSubstring.length > 1) {

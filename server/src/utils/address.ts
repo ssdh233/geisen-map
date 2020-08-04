@@ -1,39 +1,44 @@
-import fetch from "node-fetch";
-import sleep from "./sleep";
 import { NormalizedAddress } from "../models/gameCenter";
+import imi from "imi-enrichment-address";
 
-const ADDRESS_NORMALIZE_API_URL =
-  "https://api.loctouch.com/v1/geo/address_normalize?address=";
-const RETRY_LIMIT = 10;
+function toHalfWidth(str: string) {
+  return str
+    .replace(/[Ａ-Ｚａ-ｚ０-９]/g, function (s) {
+      return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
+    })
+    .replace("−", "-");
+}
 
 export default async function normalizeAddress(
   rawAddress: string
 ): Promise<NormalizedAddress> {
   // remove space
   let address = rawAddress.replace(/\s|　/g, "");
+  address = toHalfWidth(address);
 
-  return { fullAddress: address };
+  const result = await imi(address);
 
-  // const url = ADDRESS_NORMALIZE_API_URL + encodeURIComponent(address);
-  // let resJson;
-  // let count = 0;
+  const {
+    住所: { 都道府県: prefecture, 市区町村: city, 区: ward },
+  } = result;
 
-  // while (!resJson && count < RETRY_LIMIT) {
-  //   try {
-  //     count++;
-  //     resJson = await fetch(url).then(res => res.json());
+  let addr;
+  if (ward) {
+    addr = address.split(ward)[1];
+  } else if (city) {
+    addr = address.split(city)[1];
+  }
 
-  //     return {
-  //       regionId: resJson.result.region_id,
-  //       fullAddress: rawAddress,
-  //       ...resJson.result.normalize
-  //     };
-  //   } catch (error) {
-  //     // console.log(error);
-  //     await sleep(1000);
-  //     console.log("Got error. Try to refetch...", url, rawAddress, resJson);
-  //   }
-  // }
+  const [, number] = addr?.match(/([0-9]+(?:-[0-9]+)*)/) || [];
+  const [town, build] = addr?.split(number) || [];
 
-  // return null;
+  return {
+    fullAddress: address,
+    prefecture,
+    city,
+    ward,
+    town,
+    number,
+    build,
+  };
 }

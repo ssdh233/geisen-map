@@ -7,12 +7,13 @@ export type Info = {
 };
 
 export type NormalizedAddress = {
-  regionId: string;
-  fullAddress: string;
-  build: string;
-  number: string;
-  region: string;
+  prefecture: string;
+  city: string;
+  ward: string;
   town: string;
+  number: string;
+  build: string;
+  fullAddress: string;
 };
 
 export type GameCenter = {
