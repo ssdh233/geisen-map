@@ -8,7 +8,7 @@ import {
   Popup,
   ZoomControl,
   CircleMarker,
-  Viewport
+  Viewport,
 } from "react-leaflet";
 import Fab from "@material-ui/core/Fab";
 import { makeStyles } from "@material-ui/core/styles";
@@ -92,8 +92,8 @@ function MyMap(props: Props) {
     }
     props.onChangeSpDrawerState("closed");
 
-    // waiting for animation
-    setTimeout(() => history.push(`/?${toQuery(query)}`), 150);
+    // never try to delay this. Delaying state update causes a lot of trouble
+    history.push(`/?${toQuery(query)}`);
   }
 
   function requestUserLocation(onSuccess?: () => void) {
@@ -151,7 +151,10 @@ function MyMap(props: Props) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {!isSP && <ZoomControl position="bottomright" />}
-        {getVisibleGamecenters(filterGamecenters(gamecenters, filter), viewport).map(({ _id, geo, name }) => {
+        {getVisibleGamecenters(
+          filterGamecenters(gamecenters, filter),
+          viewport
+        ).map(({ _id, geo, name }) => {
           return (
             <MyMarker
               key={_id}
@@ -186,7 +189,10 @@ function filterGamecenters(
   });
 }
 
-function getVisibleGamecenters(gamecenters: GameCenterGeoInfo[], viewport: Viewport): GameCenterGeoInfo[] {
+function getVisibleGamecenters(
+  gamecenters: GameCenterGeoInfo[],
+  viewport: Viewport
+): GameCenterGeoInfo[] {
   if (!viewport.center || !viewport.zoom) return [];
   if (viewport.zoom && viewport.zoom < 10) return [];
   const [lat, lng] = viewport.center;
@@ -198,7 +204,9 @@ function getVisibleGamecenters(gamecenters: GameCenterGeoInfo[], viewport: Viewp
 
   while (filtered.length > 300) {
     filtered = gamecenters.filter(({ geo }) => {
-      return Math.abs(geo.lat - lat) < latRange && Math.abs(geo.lng - lng) < lngRnage;
+      return (
+        Math.abs(geo.lat - lat) < latRange && Math.abs(geo.lng - lng) < lngRnage
+      );
     });
 
     latRange /= 2;

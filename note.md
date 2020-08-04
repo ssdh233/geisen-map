@@ -9,8 +9,7 @@ mongorestore --host=${host} --port=${port} -u ${user} -p ${password} --db ${db} 
 
 #### TODOs
 
-* (S) server data update
-  * (A) crawler automation
+* (A) crawler automation
 * (B) SEO dynamic rendering
 * (A) user
   * checkout
