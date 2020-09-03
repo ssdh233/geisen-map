@@ -4,15 +4,22 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "imi-enrichment-address": "2.0.0",
+    "@types/cookie-parser": "^1.4.2",
+    "@types/jsonwebtoken": "^8.5.0",
+    "@types/oauth": "^0.9.1",
     "@types/testing-library__dom": "^7.5.0",
+    "body-parser": "^1.19.0",
     "cheerio": "^1.0.0-rc.3",
+    "cookie-parser": "^1.4.5",
     "csvtojson": "^2.0.10",
     "dotenv": "^8.0.0",
     "encoding-japanese": "^1.0.29",
     "express": "^4.17.1",
+    "imi-enrichment-address": "2.0.0",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.6.7",
     "node-fetch": "^2.6.0",
+    "oauth": "^0.9.15",
     "string-similarity": "^3.0.0"
   },
   "devDependencies": {

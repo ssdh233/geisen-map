@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+} from "react-router-dom";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 
 import Map from "./components/Map";
 import MainSide from "./components/MainSide";
+import User from "./components/User";
 import GameCenterInfo from "./components/GameCenterInfo";
 import { DrawerState } from "./components/MyDrawer";
+import SignInPage from "./components/SignInPage";
 
 import "./base.css";
 
@@ -22,17 +29,20 @@ function App() {
 
   return (
     <div className="App">
-      <Map
-        onChangeSpDrawerState={setSpDrawerState}
-        onChangeFilterExpanded={setFilterExpanded}
-      />
-      <MainSide
-        filterExpanded={filterExpanded}
-        onChangeFilterExpanded={setFilterExpanded}
-        spDrawerState={spDrawerState}
-        onChangeSpDrawerState={setSpDrawerState}
-      >
-        <Switch>
+      <Route exact path="/">
+        <Redirect to="/map" />
+      </Route>
+      <Route path="/map">
+        <Map
+          onChangeSpDrawerState={setSpDrawerState}
+          onChangeFilterExpanded={setFilterExpanded}
+        />
+        <MainSide
+          filterExpanded={filterExpanded}
+          onChangeFilterExpanded={setFilterExpanded}
+          spDrawerState={spDrawerState}
+          onChangeSpDrawerState={setSpDrawerState}
+        >
           <Route exact path="/">
             <p>Welcome to Geisen Map!</p>
           </Route>
@@ -46,14 +56,18 @@ function App() {
               />
             )}
           ></Route>
-        </Switch>
-      </MainSide>
+        </MainSide>
+        <User />
+      </Route>
+      <Route path="/signin" component={SignInPage}></Route>
     </div>
   );
 }
 
 export default () => (
   <Router>
-    <App />
+    <Switch>
+      <App />
+    </Switch>
   </Router>
 );
