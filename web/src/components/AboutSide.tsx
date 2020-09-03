@@ -16,6 +16,9 @@ function AboutSide(props: Props) {
       <img style={{ margin: 20 }} src="/static/logo.png" />
       <Divider />
       <List component="nav" aria-label="secondary mailbox folders">
+        <ListItem button>
+          <ListItemText primary="ログイン" />
+        </ListItem>
         <ListItem button component="a" href="https://twitter.com/geisen_map">
           <ListItemText primary="Twitter" />
         </ListItem>

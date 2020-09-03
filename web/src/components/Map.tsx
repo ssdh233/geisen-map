@@ -93,7 +93,7 @@ function MyMap(props: Props) {
     props.onChangeSpDrawerState("closed");
 
     // never try to delay this. Delaying state update causes a lot of trouble
-    history.push(`/?${toQuery(query)}`);
+    history.push(`/map?${toQuery(query)}`);
   }
 
   function requestUserLocation(onSuccess?: () => void) {
@@ -160,7 +160,7 @@ function MyMap(props: Props) {
               key={_id}
               position={[geo.lat, geo.lng]}
               onClick={() => {
-                history.push(`/gamecenter/${_id}?${toQuery(query)}`);
+                history.push(`/map/gamecenter/${_id}?${toQuery(query)}`);
               }}
             >
               <Popup autoPan={false}>{name}</Popup>

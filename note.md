@@ -8,6 +8,7 @@ mongorestore --host=${host} --port=${port} -u ${user} -p ${password} --db ${db} 
 ```
 
 #### TODOs
+User-checkout
 
 * (A) crawler automation
 * (B) SEO dynamic rendering
@@ -32,5 +33,6 @@ user level:
   close -> need 5 or more users to confirm
 
 #### Action tree
-* trying to normalize address (again!) and recrawl data
-* think of a data-model which can utilize both crawler's and user's data
+* [ ] User checkout
+  * [x] twitter login
+  * [?] google login (maybe later)
