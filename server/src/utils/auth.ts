@@ -34,7 +34,16 @@ async function auth(req: express.Request, res: express.Response) {
       if (userQuery.refreshToken === refreshToken) {
         userId = decoded.userId;
         const newAccessToken = createAccessToken(userId);
-        res.cookie("accessToken", newAccessToken);
+        res.cookie(
+          "accessToken",
+          newAccessToken,
+          process.env.LOCAL_TESTING === "true"
+            ? {}
+            : {
+                sameSite: "none",
+                secure: true,
+              }
+        );
       } else {
         res.status(401);
         res.end();

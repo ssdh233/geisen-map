@@ -64,14 +64,41 @@ const TwitterApi = (app: express.Express) => {
               await user.save();
 
               res
-                .cookie("accessToken", accessToken)
-                .cookie("refreshToken", refreshToken)
+                .cookie(
+                  "accessToken",
+                  accessToken,
+                  process.env.LOCAL_TESTING === "true"
+                    ? {}
+                    : {
+                        sameSite: "none",
+                        secure: true,
+                      }
+                )
+                .cookie(
+                  "refreshToken",
+                  refreshToken,
+                  process.env.LOCAL_TESTING === "true"
+                    ? {}
+                    : {
+                        sameSite: "none",
+                        secure: true,
+                      }
+                )
                 .redirect(`${process.env.APP_URL}/map`);
             } else {
               const tempToken = createTempToken(twitterId);
 
               res
-                .cookie("tempToken", tempToken)
+                .cookie(
+                  "tempToken",
+                  tempToken,
+                  process.env.LOCAL_TESTING === "true"
+                    ? {}
+                    : {
+                        sameSite: "none",
+                        secure: true,
+                      }
+                )
                 .redirect(
                   `${process.env.APP_URL}/signin?type=twitter&twitterName=${twitterName}`
                 );
@@ -104,8 +131,26 @@ const TwitterApi = (app: express.Express) => {
     await newUserQuery.save();
 
     res
-      .cookie("accessToken", accessToken)
-      .cookie("refreshToken", refreshToken)
+      .cookie(
+        "accessToken",
+        accessToken,
+        process.env.LOCAL_TESTING === "true"
+          ? {}
+          : {
+              sameSite: "none",
+              secure: true,
+            }
+      )
+      .cookie(
+        "refreshToken",
+        refreshToken,
+        process.env.LOCAL_TESTING === "true"
+          ? {}
+          : {
+              sameSite: "none",
+              secure: true,
+            }
+      )
       .redirect(`${process.env.APP_URL}/map`);
   });
 };

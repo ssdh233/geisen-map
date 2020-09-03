@@ -12,13 +12,16 @@ function User() {
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
+    // TODO status code thing
     fetch(`${REACT_APP_API_URL}/user`, {
+      method: "GET",
       credentials: "include",
     })
       .then((res) => res.json())
       .then((json) => {
         setUser(json);
-      });
+      })
+      .catch(() => {});
   }, []);
 
   return (
