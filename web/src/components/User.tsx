@@ -29,8 +29,8 @@ function User() {
       style={{
         zIndex: 10000,
         position: "fixed",
-        right: 16,
-        top: 16,
+        right: 12,
+        top: 12,
       }}
     >
       <Avatar
