@@ -11,12 +11,13 @@ export type Info = {
 };
 
 export type NormalizedAddress = {
-  regionId: string;
-  fullAddress: string;
-  build: string;
-  number: string;
-  region: string;
+  prefecture: string;
+  city: string;
+  ward: string;
   town: string;
+  number: string;
+  build: string;
+  fullAddress: string;
 };
 
 export type GameCenter = {
@@ -32,7 +33,9 @@ export type GameCenter = {
 
 type GameCenterDocument = GameCenter & mongoose.Document;
 type GameCenterModel = mongoose.Model<GameCenterDocument> & {
-  findSameGameCenter: (gameCenter: GameCenter) => Promise<GameCenterDocument | null>;
+  findSameGameCenter: (
+    gameCenter: GameCenter
+  ) => Promise<GameCenterDocument | null>;
 };
 
 const Info = {
@@ -40,7 +43,7 @@ const Info = {
   text: String,
   sourceId: String,
   url: String,
-  updateTime: Date
+  updateTime: Date,
 };
 
 const GameCenterSchema = new mongoose.Schema({
@@ -52,68 +55,96 @@ const GameCenterSchema = new mongoose.Schema({
     build: String,
     number: String,
     region: String,
-    town: String
+    town: String,
   },
   infos: [Info],
   games: [
     {
       name: String, // Enum?
-      infos: [Info]
-    }
-  ]
+      infos: [Info],
+    },
+  ],
 });
 
 const SEARCH_RANGE = 0.01;
-GameCenterSchema.statics.findSameGameCenter = async function(gameCenter: GameCenter): Promise<GameCenter | null> {
-  console.log("================================================================================");
-  console.log("findSameGameCenter:", gameCenter.name);
+GameCenterSchema.statics.findSameGameCenter = async function (
+  gameCenter: GameCenter
+): Promise<GameCenter | null> {
+  // console.log(
+  //   "================================================================================"
+  // );
+  // console.log("findSameGameCenter:", gameCenter.name);
+  // console.log("search condition", gameCenter.geo.lat, gameCenter.geo.lng);
   const results = await this.find({
-    "geo.lat": { $gt: gameCenter.geo.lat - SEARCH_RANGE, $lt: gameCenter.geo.lat + SEARCH_RANGE },
-    "geo.lng": { $gt: gameCenter.geo.lng - SEARCH_RANGE, $lt: gameCenter.geo.lng + SEARCH_RANGE }
+    "geo.lat": {
+      $gt: gameCenter.geo.lat - SEARCH_RANGE,
+      $lt: gameCenter.geo.lat + SEARCH_RANGE,
+    },
+    "geo.lng": {
+      $gt: gameCenter.geo.lng - SEARCH_RANGE,
+      $lt: gameCenter.geo.lng + SEARCH_RANGE,
+    },
   });
-  console.log("results.length", results.length);
+  // console.log("results.length", results.length);
 
   if (!results) return null;
 
   for (let i = 0; i < results.length; i++) {
     const isSame = isSameGameCenter(gameCenter, results[i]);
-    console.log("========================================");
-    console.log(gameCenter);
+    // console.log("========================================");
+    // console.log(gameCenter);
 
-    console.log("==========");
-    console.log(results[i]);
+    // console.log("==========");
+    // console.log(results[i]);
 
-    console.log("==========");
-    console.log({ isSame, A: gameCenter.name, B: results[i].name });
-    console.log("========================================");
+    // console.log("==========");
+    // console.log({ isSame, A: gameCenter.name, B: results[i].name });
+    // console.log("========================================");
 
     if (isSame) {
-      console.log("found:", gameCenter.name, results[i].name);
+      // console.log("found:", gameCenter.name, results[i].name);
       return results[i];
     }
   }
-  console.log("fail to find:", gameCenter.name);
+  // console.log("fail to find:", gameCenter.name);
   return null;
 };
 
-function isSameGameCenter(gameCenterA: GameCenter, gameCenterB: GameCenter): boolean {
-  if (gameCenterA.address.regionId !== gameCenterB.address.regionId) {
-    return false;
-  }
-
-  const normalizeNameA = normalizeGameCenterName(gameCenterA.name, gameCenterA.address);
-  const normalizeNameB = normalizeGameCenterName(gameCenterB.name, gameCenterB.address);
-
-  console.log(normalizeNameA, normalizeNameB);
-  const nameSimilarity = stringSimilarity.compareTwoStrings(normalizeNameA, normalizeNameB);
-  console.log({ nameSimilarity });
-
-  console.log(gameCenterA.address.fullAddress, gameCenterB.address.fullAddress);
-  const addressSimilarity = stringSimilarity.compareTwoStrings(
-    gameCenterA.address.region + gameCenterA.address.town + gameCenterA.address.number,
-    gameCenterB.address.region + gameCenterB.address.town + gameCenterB.address.number
+function isSameGameCenter(
+  gameCenterA: GameCenter,
+  gameCenterB: GameCenter
+): boolean {
+  const normalizeNameA = normalizeGameCenterName(
+    gameCenterA.name,
+    gameCenterA.address
   );
-  console.log({ addressSimilarity });
+  const normalizeNameB = normalizeGameCenterName(
+    gameCenterB.name,
+    gameCenterB.address
+  );
+
+  // console.log(normalizeNameA, normalizeNameB);
+  const nameSimilarity = stringSimilarity.compareTwoStrings(
+    normalizeNameA,
+    normalizeNameB
+  );
+  // console.log({ nameSimilarity });
+
+  // console.log(gameCenterA.address.fullAddress, gameCenterB.address.fullAddress);
+  // const addressSimilarity = stringSimilarity.compareTwoStrings(
+  //   gameCenterA.address.region +
+  //     gameCenterA.address.town +
+  //     gameCenterA.address.number,
+  //   gameCenterB.address.region +
+  //     gameCenterB.address.town +
+  //     gameCenterB.address.number
+  // );
+  const addressSimilarity = stringSimilarity.compareTwoStrings(
+    gameCenterA.address.fullAddress,
+    gameCenterB.address.fullAddress
+  );
+
+  // console.log({ addressSimilarity });
 
   // exactly same address with almost same name
   if (addressSimilarity > 0.8 && nameSimilarity > 0.5) {
@@ -128,5 +159,8 @@ function isSameGameCenter(gameCenterA: GameCenter, gameCenterB: GameCenter): boo
   return false;
 }
 
-const GameCenterModel = mongoose.model<GameCenterDocument, GameCenterModel>("gameCenter", GameCenterSchema);
+const GameCenterModel = mongoose.model<GameCenterDocument, GameCenterModel>(
+  "gameCenter",
+  GameCenterSchema
+);
 export default GameCenterModel;
