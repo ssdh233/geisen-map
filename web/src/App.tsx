@@ -43,11 +43,11 @@ function App() {
           spDrawerState={spDrawerState}
           onChangeSpDrawerState={setSpDrawerState}
         >
-          <Route exact path="/">
+          <Route exact path="/map">
             <p>Welcome to Geisen Map!</p>
           </Route>
           <Route
-            path="/gamecenter/:gamecenterId"
+            path="/map/gamecenter/:gamecenterId"
             render={(routeProps) => (
               <GameCenterInfo
                 {...routeProps}
