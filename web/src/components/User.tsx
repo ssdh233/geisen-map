@@ -30,7 +30,7 @@ function User() {
         zIndex: 110,
         position: "fixed",
         right: 16,
-        top: 16,
+        top: 12,
       }}
     >
       <Avatar
