@@ -5,6 +5,7 @@ import useMediaQuery from "@material-ui/core/useMediaQuery";
 
 import { DrawerState } from "./MyDrawer";
 import { GameCenter } from "../types";
+import CheckInDialog from "./CheckInDialog";
 
 const { REACT_APP_API_URL } = process.env;
 
@@ -79,6 +80,7 @@ function GameCenterInfo(props: {
   onChangeFilterExapnded: (state: boolean) => void;
   onChangeSpDrawerState: (state: DrawerState) => void;
 }) {
+  const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
   const [data, setData] = useState<GameCenter | null>(null);
   const { gamecenterId } = props.match.params;
 
@@ -103,6 +105,14 @@ function GameCenterInfo(props: {
   return (
     data && (
       <>
+        <button onClick={() => setCheckInDialogOpen(true)}>
+          クソザコCheck in
+        </button>
+        <CheckInDialog
+          gamecenterData={data}
+          open={checkInDialogOpen}
+          onClose={() => setCheckInDialogOpen(false)}
+        />
         <GameCenterInfoHeader data={data} />
         <GameCenterInfoBody data={data} />
       </>

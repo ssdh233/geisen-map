@@ -27,7 +27,7 @@ function User() {
   return (
     <div
       style={{
-        zIndex: 10000,
+        zIndex: 110,
         position: "fixed",
         right: 16,
         top: 16,

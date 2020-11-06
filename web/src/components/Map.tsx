@@ -29,7 +29,7 @@ const { REACT_APP_API_URL } = process.env;
 const useStyles = makeStyles({
   homeButton: {
     position: "absolute",
-    zIndex: 1001,
+    zIndex: 101,
     bottom: 72,
     right: 24,
     backgroundColor: "white",
@@ -38,7 +38,7 @@ const useStyles = makeStyles({
     position: "absolute",
     right: 12,
     bottom: 100,
-    zIndex: 1001,
+    zIndex: 101,
     padding: 0,
     backgroundColor: "white",
     width: 30,
@@ -46,6 +46,9 @@ const useStyles = makeStyles({
     minHeight: 30,
     borderRadius: 5,
   },
+  mapRoot: {
+    zIndex: 100
+  }
 });
 
 type Props = {
@@ -141,6 +144,7 @@ function MyMap(props: Props) {
         />
       </Helmet>
       <Map
+        className={classes.mapRoot}
         viewport={viewport}
         onViewportChange={debounce(setViewport, 100)}
         zoomControl={false}
