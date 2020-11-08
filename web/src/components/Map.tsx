@@ -47,8 +47,8 @@ const useStyles = makeStyles({
     borderRadius: 5,
   },
   mapRoot: {
-    zIndex: 100
-  }
+    zIndex: 100,
+  },
 });
 
 type Props = {
@@ -172,14 +172,14 @@ function MyMap(props: Props) {
           );
         })}
         {userLocation && <CircleMarker center={userLocation} radius={10} />}
-        <Fab
-          size={isSP ? "large" : "small"}
-          className={cx(!isSP && classes.homeButtonPC, classes.homeButton)}
-          onClick={handleHomeButtonClick}
-        >
-          <MyLocationButton fontSize={isSP ? "default" : "small"} />
-        </Fab>
       </Map>
+      <Fab
+        size={isSP ? "large" : "small"}
+        className={cx(!isSP && classes.homeButtonPC, classes.homeButton)}
+        onClick={handleHomeButtonClick}
+      >
+        <MyLocationButton fontSize={isSP ? "default" : "small"} />
+      </Fab>
     </div>
   );
 }
