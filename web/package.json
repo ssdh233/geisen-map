@@ -16,6 +16,7 @@
     "@types/react-helmet": "^6.0.0",
     "@types/react-leaflet": "^2.5.2",
     "@types/react-router-dom": "^5.1.5",
+    "dayjs": "^1.9.5",
     "dotenv": "^8.2.0",
     "downshift": "^5.4.5",
     "leaflet": "^1.6.0",

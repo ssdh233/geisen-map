@@ -3,6 +3,7 @@ import Avatar from "@material-ui/core/Avatar";
 import Popover from "@material-ui/core/Popover";
 import MenuList from "@material-ui/core/MenuList";
 import MenuItem from "@material-ui/core/MenuItem";
+import { useHistory, useLocation } from "react-router-dom";
 
 const { REACT_APP_API_URL } = process.env;
 
@@ -61,6 +62,9 @@ type UserMenuProps = {
 };
 
 function UserMenu({ open, onClose, anchorEl, loggedIn }: UserMenuProps) {
+  const history = useHistory();
+  const location = useLocation();
+
   function handleSignOut() {
     document.cookie += "accessToken=; Max-Age=0";
     document.cookie += "refreshToken=; Max-Age=0";
@@ -89,10 +93,22 @@ function UserMenu({ open, onClose, anchorEl, loggedIn }: UserMenuProps) {
     >
       <MenuList>
         {loggedIn ? (
-          <>
-            <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
-            <MenuItem>Profile</MenuItem>
-          </>
+          [
+            <MenuItem onClick={handleSignOut} key="signout">
+              Sign out
+            </MenuItem>,
+            <MenuItem
+              onClick={() => {
+                history.push({
+                  pathname: "/map/profile",
+                  search: location.search,
+                });
+              }}
+              key="profile"
+            >
+              Profile
+            </MenuItem>,
+          ]
         ) : (
           <MenuItem onClick={handleTwitterLogin}>TwitterでSign in</MenuItem>
         )}

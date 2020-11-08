@@ -13,6 +13,7 @@ import User from "./components/User";
 import GameCenterInfo from "./components/GameCenterInfo";
 import { DrawerState } from "./components/MyDrawer";
 import SignInPage from "./components/SignInPage";
+import ProfilePage from "./components/ProfilePage";
 
 import "./base.css";
 
@@ -52,6 +53,15 @@ function App() {
               <GameCenterInfo
                 {...routeProps}
                 onChangeFilterExapnded={setFilterExpanded}
+                onChangeSpDrawerState={setSpDrawerState}
+              />
+            )}
+          ></Route>
+          <Route
+            path="/map/profile"
+            render={(routerProps) => (
+              <ProfilePage
+                {...routerProps}
                 onChangeSpDrawerState={setSpDrawerState}
               />
             )}
