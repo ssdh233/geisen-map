@@ -2,7 +2,7 @@ import fetch from "node-fetch";
 import cheerio from "cheerio";
 
 import Crawler from "./crawler";
-import { getGeoFromText } from "../utils/googleMapApi";
+
 require("dotenv").config();
 
 const popnCrawler = new Crawler({

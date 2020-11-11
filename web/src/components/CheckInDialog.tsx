@@ -15,10 +15,14 @@ import cx from "../utils/classname";
 import { NAME_MAP } from "../constants/game";
 import { GameCenter, Filter } from "../types";
 
+const { REACT_APP_API_URL } = process.env;
+
 type Props = {
   open: boolean;
   onClose: () => void;
   gamecenterData: GameCenter;
+  userLocation: [number, number] | null;
+  requestUserLocation: (onSuccess?: () => void) => void;
 };
 
 const Transition = React.forwardRef(function Transition(
@@ -65,8 +69,29 @@ function CheckInDialog(props: Props) {
     }, {} as Filter)
   );
 
-  function onCheckIn() {
-    console.log(filter);
+  async function onCheckIn() {
+    if (!props.userLocation) {
+      await new Promise((resolve) => {
+        props.requestUserLocation(() => resolve());
+      });
+    }
+
+    const res = await fetch(`${REACT_APP_API_URL}/checkIns`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        gamecenterId: props.gamecenterData._id,
+        games: Object.keys(filter).filter((game) => filter[game]),
+        userLocation: props.userLocation,
+      }),
+    });
+
+    if (res.status === 200) {
+      props.onClose();
+    }
   }
 
   return (

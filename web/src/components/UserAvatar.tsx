@@ -4,26 +4,13 @@ import Popover from "@material-ui/core/Popover";
 import MenuList from "@material-ui/core/MenuList";
 import MenuItem from "@material-ui/core/MenuItem";
 import { useHistory, useLocation } from "react-router-dom";
+import { User } from "../App";
 
 const { REACT_APP_API_URL } = process.env;
 
-function User() {
+function UserAvatar({ user }: { user: User | null }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    // TODO status code thing
-    fetch(`${REACT_APP_API_URL}/user`, {
-      method: "GET",
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        setUser(json);
-      })
-      .catch(() => {});
-  }, []);
 
   return (
     <div
@@ -117,4 +104,4 @@ function UserMenu({ open, onClose, anchorEl, loggedIn }: UserMenuProps) {
   );
 }
 
-export default User;
+export default UserAvatar;

@@ -1,20 +1,32 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { User } from "../App";
 
-import CheckInTable from "./CheckInTable";
+import CheckInTable, { CheckIn } from "./CheckInTable";
 import { DrawerState } from "./MyDrawer";
 
 type Props = {
+  user: User | null;
   onChangeSpDrawerState: (state: DrawerState) => void;
 };
 
 export default function ProfilePage(props: Props) {
+  const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
   useEffect(() => {
     props.onChangeSpDrawerState("open");
   }, []);
 
+  useEffect(() => {
+    fetch(`${process.env.REACT_APP_API_URL}/checkIns`, {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((json) => setCheckIns(json));
+  }, []);
+
   return (
-    <div>
-      <h1>まつまつ</h1>
+    <div style={{ padding: 16 }}>
+      <h1>{props.user?.name}</h1>
       <h2>チェックイン</h2>
       <div
         style={{
@@ -22,18 +34,22 @@ export default function ProfilePage(props: Props) {
           flexDirection: "column",
           alignItems: "flex-end",
           maxWidth: 400,
-          margin: "auto",
+          margin: "16px auto",
         }}
       >
-        <CheckInTable />
+        <CheckInTable checkIns={checkIns} />
       </div>
       <h2>アクティビティ</h2>
       <div>
-        {Array(10)
-          .fill(0)
-          .map(() => (
-            <p>2020年11月08日 15:20 なになにラウンドワン</p>
-          ))}
+        {checkIns.map((checkIn) => {
+          const date = new Date(checkIn.date);
+          return (
+            <p>
+              {date.toLocaleDateString()} {date.getHours()}:{date.getMinutes()}{" "}
+              {checkIn.gamecenterName}
+            </p>
+          );
+        })}
       </div>
     </div>
   );

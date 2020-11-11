@@ -8,6 +8,7 @@ import gameCenterApi from "./apis/gameCenter";
 import geoInfoApi from "./apis/geoInfo";
 import TwitterApi from "./apis/twitter";
 import UserApi from "./apis/user";
+import checkInApi from "./apis/checkIn";
 
 import { dbConnect } from "./utils/mongo";
 
@@ -31,6 +32,7 @@ gameCenterApi(app);
 geoInfoApi(app);
 TwitterApi(app);
 UserApi(app);
+checkInApi(app);
 
 const port = process.env.PORT;
 // start the express server

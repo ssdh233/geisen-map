@@ -2,16 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Fragment } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
+import Button from "@material-ui/core/Button";
 
+import distance from "../utils/distance";
 import { DrawerState } from "./MyDrawer";
 import { GameCenter } from "../types";
 import CheckInDialog from "./CheckInDialog";
+import { User } from "../App";
 
 const { REACT_APP_API_URL } = process.env;
-
-type Prop = {
-  data: GameCenter;
-};
 
 const useStyles = makeStyles({
   gameCenterInfo: {
@@ -22,9 +21,17 @@ const useStyles = makeStyles({
     padding: isSP ? "16px 30px" : "16px 24px",
     textAlign: isSP ? "center" : "left",
   }),
+  button: {
+    display: "flex",
+    flexDirection: "column",
+    width: "20%",
+    fontSize: 10,
+    alignItems: "center",
+    textAlign: "center",
+  },
 });
 
-export function GameCenterInfoHeader(props: Prop) {
+export function GameCenterInfoHeader(props: { data: GameCenter }) {
   const isSP = useMediaQuery("(max-width: 768px)");
   const classes = useStyles({ isSP });
 
@@ -34,7 +41,11 @@ export function GameCenterInfoHeader(props: Prop) {
   return <h2 className={classes.name}>{name}</h2>;
 }
 
-export function GameCenterInfoBody(props: Prop) {
+export function GameCenterInfoBody(props: {
+  data: GameCenter;
+  userLocation: [number, number] | null;
+  requestUserLocation: (onSuccess?: () => void) => void;
+}) {
   const isSP = useMediaQuery("(max-width: 768px)");
   const classes = useStyles({ isSP });
 
@@ -77,6 +88,9 @@ function GameCenterInfo(props: {
       gamecenterId?: string;
     };
   };
+  user: User | null;
+  userLocation: [number, number] | null;
+  requestUserLocation: (onSuccess?: () => void) => void;
   onChangeFilterExapnded: (state: boolean) => void;
   onChangeSpDrawerState: (state: DrawerState) => void;
 }) {
@@ -102,19 +116,46 @@ function GameCenterInfo(props: {
     props.onChangeSpDrawerState("halfOpen");
   }, []);
 
+  const d =
+    (data?.geo &&
+      props.userLocation &&
+      distance(
+        data?.geo.lat,
+        data?.geo.lng,
+        props.userLocation[0],
+        props.userLocation[1],
+        "K"
+      ) * 1000) ||
+    -1;
+  const isCloseEnough = d !== -1 && d < 100;
+
   return (
     data && (
       <>
-        <button onClick={() => setCheckInDialogOpen(true)}>
-          クソザコCheck in
-        </button>
         <CheckInDialog
+          userLocation={props.userLocation}
+          requestUserLocation={props.requestUserLocation}
           gamecenterData={data}
           open={checkInDialogOpen}
           onClose={() => setCheckInDialogOpen(false)}
         />
+        {!!props.user && isCloseEnough && (
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <Button
+              onClick={() => setCheckInDialogOpen(true)}
+              variant="contained"
+              color="primary"
+            >
+              チェックイン！
+            </Button>
+          </div>
+        )}
         <GameCenterInfoHeader data={data} />
-        <GameCenterInfoBody data={data} />
+        <GameCenterInfoBody
+          data={data}
+          userLocation={props.userLocation}
+          requestUserLocation={props.requestUserLocation}
+        />
       </>
     )
   );
