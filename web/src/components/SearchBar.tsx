@@ -30,7 +30,7 @@ const useStyles = makeStyles({
   },
   paper: {
     position: "absolute",
-    zIndex: 1,
+    zIndex: 101,
     width: "calc(100% - 16px)",
   },
   suggestionIcon: {

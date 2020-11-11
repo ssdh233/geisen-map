@@ -4,7 +4,7 @@ import GameCenterModel, { GameCenter, Info } from "../models/gameCenter";
 // TODO get this info from mongodb
 const SOURCE_RANK = {
   taiko_official: 1,
-  popn_official: 1
+  popn_official: 1,
 };
 
 export const NAME_MAP = {
@@ -26,7 +26,7 @@ export const NAME_MAP = {
   wacca: "WACCA",
   ongeki: "オンゲキ",
   chuni: "チューニズム",
-  diva: "初音ミク Project DIVA Arcade Future Tone"
+  diva: "初音ミク Project DIVA Arcade Future Tone",
 };
 
 const gameCenterApi = (app: express.Express) => {
@@ -52,9 +52,9 @@ const gameCenterApi = (app: express.Express) => {
           _id: 1,
           geo: 1,
           name: 1,
-          games: { $map: { input: "$games", as: "game", in: "$$game.name" } }
-        }
-      }
+          games: { $map: { input: "$games", as: "game", in: "$$game.name" } },
+        },
+      },
     ]);
     res.json(result);
   });
@@ -63,7 +63,7 @@ const gameCenterApi = (app: express.Express) => {
 // XXX: mutating rawResult
 function processRawResult(rawResult: GameCenter) {
   const infoResult = {} as { [infoType: string]: Info };
-  rawResult.infos.forEach(info => {
+  rawResult.infos.forEach((info) => {
     if (infoResult[info.infoType]) {
       const currentInfo = infoResult[info.infoType];
       // @ts-ignore
@@ -75,9 +75,9 @@ function processRawResult(rawResult: GameCenter) {
     }
   });
 
-  const games = rawResult.games.map(game => {
+  const games = rawResult.games.map((game) => {
     const gameinfoResult = {} as { [infoType: string]: Info };
-    game.infos.forEach(gameInfo => {
+    game.infos.forEach((gameInfo) => {
       if (gameInfo.infoType === "main") return;
       if (!gameinfoResult[gameInfo.infoType]) {
         gameinfoResult[gameInfo.infoType] = gameInfo;
@@ -94,16 +94,17 @@ function processRawResult(rawResult: GameCenter) {
     return {
       // @ts-ignore
       name: NAME_MAP[game.name],
-      infos: Object.values(gameinfoResult)
+      infos: Object.values(gameinfoResult),
     };
   });
 
   return {
+    _id: rawResult._id,
     geo: rawResult.geo,
     name: rawResult.name,
     address: rawResult.address,
     infos: Object.values(infoResult),
-    games
+    games,
   };
 }
 

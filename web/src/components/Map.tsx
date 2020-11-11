@@ -29,7 +29,7 @@ const { REACT_APP_API_URL } = process.env;
 const useStyles = makeStyles({
   homeButton: {
     position: "absolute",
-    zIndex: 1001,
+    zIndex: 101,
     bottom: 72,
     right: 24,
     backgroundColor: "white",
@@ -38,7 +38,7 @@ const useStyles = makeStyles({
     position: "absolute",
     right: 12,
     bottom: 100,
-    zIndex: 1001,
+    zIndex: 101,
     padding: 0,
     backgroundColor: "white",
     width: 30,
@@ -46,9 +46,14 @@ const useStyles = makeStyles({
     minHeight: 30,
     borderRadius: 5,
   },
+  mapRoot: {
+    zIndex: 100,
+  },
 });
 
 type Props = {
+  userLocation: [number, number] | null;
+  requestUserLocation: (onSuccess?: () => void) => void;
   onChangeFilterExpanded: (state: boolean) => void;
   onChangeSpDrawerState: (state: DrawerState) => void;
 };
@@ -74,13 +79,9 @@ function MyMap(props: Props) {
     myFunc();
   }, [setGamecenters]);
 
-  const [userLocation, setUserLocation] = useState(
-    null as [number, number] | null
-  );
-
   function handleHomeButtonClick() {
-    if (userLocation) {
-      setViewport({ center: userLocation, zoom: 14 });
+    if (props.userLocation) {
+      setViewport({ center: props.userLocation, zoom: 14 });
     } else {
       // TODO tell user to set permission
     }
@@ -96,40 +97,13 @@ function MyMap(props: Props) {
     history.push(`/map?${toQuery(query)}`);
   }
 
-  function requestUserLocation(onSuccess?: () => void) {
-    let startPos;
-    let geoOptions = {
-      timeout: 10 * 1000,
-    };
-
-    let geoSuccess = function (position: {
-      coords: { latitude: number; longitude: number };
-    }) {
-      startPos = position;
-      setUserLocation([startPos.coords.latitude, startPos.coords.longitude]);
-      if (onSuccess) onSuccess();
-    };
-    let geoError = function (error: { code: number }) {
-      console.error(
-        "Error occurred. Error code: " + error.code,
-        ({
-          "0": "unknown error",
-          "1": "permission denied",
-          "2": "position unavailable (error response from location provider)",
-          "3": "timed out",
-        } as any)["" + error.code]
-      );
-    };
-
-    navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geoOptions);
-  }
-
   useEffect(() => {
-    requestUserLocation(() => {
-      const id = setInterval(() => requestUserLocation(), 3000);
+    props.requestUserLocation(() => {
+      const id = setInterval(() => props.requestUserLocation(), 3000);
       return () => clearInterval(id);
     });
   }, []);
+
   const classes = useStyles();
 
   return (
@@ -141,6 +115,7 @@ function MyMap(props: Props) {
         />
       </Helmet>
       <Map
+        className={classes.mapRoot}
         viewport={viewport}
         onViewportChange={debounce(setViewport, 100)}
         zoomControl={false}
@@ -167,15 +142,17 @@ function MyMap(props: Props) {
             </MyMarker>
           );
         })}
-        {userLocation && <CircleMarker center={userLocation} radius={10} />}
-        <Fab
-          size={isSP ? "large" : "small"}
-          className={cx(!isSP && classes.homeButtonPC, classes.homeButton)}
-          onClick={handleHomeButtonClick}
-        >
-          <MyLocationButton fontSize={isSP ? "default" : "small"} />
-        </Fab>
+        {props.userLocation && (
+          <CircleMarker center={props.userLocation} radius={10} />
+        )}
       </Map>
+      <Fab
+        size={isSP ? "large" : "small"}
+        className={cx(!isSP && classes.homeButtonPC, classes.homeButton)}
+        onClick={handleHomeButtonClick}
+      >
+        <MyLocationButton fontSize={isSP ? "default" : "small"} />
+      </Fab>
     </div>
   );
 }

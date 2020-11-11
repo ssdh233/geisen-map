@@ -39,7 +39,7 @@ const useStyles = makeStyles({
   openButton: {
     ...toggleStyle,
     position: "absolute",
-    zIndex: 1000,
+    zIndex: 210,
     left: 0,
     top: 8,
   },
@@ -50,6 +50,8 @@ const useStyles = makeStyles({
   },
   searchBarContainer: {
     padding: 8,
+    zIndex: 101,
+    position: "relative",
   },
   // sp styles
   "@media (max-width: 768px)": {
@@ -58,7 +60,7 @@ const useStyles = makeStyles({
     },
   },
   spContainer: {
-    zIndex: 1200,
+    zIndex: 200,
     width: "100%",
     position: "fixed",
   },
@@ -146,7 +148,7 @@ function MainSide(props: Props) {
         </div>
       )}
       {isSP && (
-        <div className={classes.spContainer}>
+        <>
           <div className={classes.searchBarContainer}>
             <SearchBar
               onSearch={(viewport) => setViewport(viewport)}
@@ -158,24 +160,26 @@ function MainSide(props: Props) {
             />
           </div>
 
-          <Drawer variant="permanent" anchor="bottom" open={true}>
-            <GameFilter
-              expanded={props.filterExpanded}
-              onChangeExpanded={props.onChangeFilterExpanded}
-              filter={filter}
-              onChange={setFilter}
-              expandedIconState={!props.filterExpanded}
-            />
-          </Drawer>
-          {props.children && (
-            <MyDrawer
-              drawerState={props.spDrawerState}
-              onChangeDrawerState={handleChangeSpDrawerState}
-            >
-              {props.children}
-            </MyDrawer>
-          )}
-        </div>
+          <div className={classes.spContainer}>
+            <Drawer variant="permanent" anchor="bottom" open={true}>
+              <GameFilter
+                expanded={props.filterExpanded}
+                onChangeExpanded={props.onChangeFilterExpanded}
+                filter={filter}
+                onChange={setFilter}
+                expandedIconState={!props.filterExpanded}
+              />
+            </Drawer>
+            {props.children && (
+              <MyDrawer
+                drawerState={props.spDrawerState}
+                onChangeDrawerState={handleChangeSpDrawerState}
+              >
+                {props.children}
+              </MyDrawer>
+            )}
+          </div>
+        </>
       )}
     </>
   );

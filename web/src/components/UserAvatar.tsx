@@ -3,34 +3,22 @@ import Avatar from "@material-ui/core/Avatar";
 import Popover from "@material-ui/core/Popover";
 import MenuList from "@material-ui/core/MenuList";
 import MenuItem from "@material-ui/core/MenuItem";
+import { useHistory, useLocation } from "react-router-dom";
+import { User } from "../App";
 
 const { REACT_APP_API_URL } = process.env;
 
-function User() {
+function UserAvatar({ user }: { user: User | null }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    // TODO status code thing
-    fetch(`${REACT_APP_API_URL}/user`, {
-      method: "GET",
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        setUser(json);
-      })
-      .catch(() => {});
-  }, []);
 
   return (
     <div
       style={{
-        zIndex: 10000,
+        zIndex: 110,
         position: "fixed",
         right: 16,
-        top: 16,
+        top: 12,
       }}
     >
       <Avatar
@@ -61,6 +49,9 @@ type UserMenuProps = {
 };
 
 function UserMenu({ open, onClose, anchorEl, loggedIn }: UserMenuProps) {
+  const history = useHistory();
+  const location = useLocation();
+
   function handleSignOut() {
     document.cookie += "accessToken=; Max-Age=0";
     document.cookie += "refreshToken=; Max-Age=0";
@@ -89,10 +80,22 @@ function UserMenu({ open, onClose, anchorEl, loggedIn }: UserMenuProps) {
     >
       <MenuList>
         {loggedIn ? (
-          <>
-            <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
-            <MenuItem>Profile</MenuItem>
-          </>
+          [
+            <MenuItem onClick={handleSignOut} key="signout">
+              Sign out
+            </MenuItem>,
+            <MenuItem
+              onClick={() => {
+                history.push({
+                  pathname: "/map/profile",
+                  search: location.search,
+                });
+              }}
+              key="profile"
+            >
+              Profile
+            </MenuItem>,
+          ]
         ) : (
           <MenuItem onClick={handleTwitterLogin}>TwitterでSign in</MenuItem>
         )}
@@ -101,4 +104,4 @@ function UserMenu({ open, onClose, anchorEl, loggedIn }: UserMenuProps) {
   );
 }
 
-export default User;
+export default UserAvatar;

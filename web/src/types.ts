@@ -17,6 +17,7 @@ export type NormalizedAddress = {
 };
 
 export type GameCenter = {
+  _id: string;
   geo: Geo;
   name: string;
   address: NormalizedAddress;
