@@ -6,6 +6,7 @@ import {
   Redirect,
 } from "react-router-dom";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
+import useViewport from "./utils/useViewport";
 
 import Map from "./components/Map";
 import MainSide from "./components/MainSide";
@@ -32,6 +33,7 @@ export type User = {
 function App() {
   const isSP = useMediaQuery("(max-width:768px)");
 
+  const [viewport, setViewport] = useViewport();
   const [userLocation, requestUserLocation] = useUserLocation();
   const [filterExpanded, setFilterExpanded] = useState(!isSP);
   const [spDrawerState, setSpDrawerState] = useState("closed" as DrawerState);
@@ -59,16 +61,22 @@ function App() {
   return (
     <div className="App">
       <Route exact path="/">
-        <Redirect to="/map" />
+        <div>
+          should redirect
+          <Redirect to="/map" />
+        </div>
       </Route>
       <Route path="/map">
         <Map
+          viewport={viewport}
+          onChangeViewport={setViewport}
           userLocation={userLocation}
           requestUserLocation={requestUserLocation}
           onChangeSpDrawerState={setSpDrawerState}
           onChangeFilterExpanded={setFilterExpanded}
         />
         <MainSide
+          onChangeViewport={setViewport}
           filterExpanded={filterExpanded}
           onChangeFilterExpanded={setFilterExpanded}
           spDrawerState={spDrawerState}
