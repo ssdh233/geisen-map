@@ -6,6 +6,7 @@ import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import Divider from "@material-ui/core/Divider";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
+import { Viewport } from "react-leaflet";
 
 import MyDrawer, { DrawerState } from "./MyDrawer";
 import SearchBar from "./SearchBar";
@@ -72,12 +73,12 @@ type Props = {
   onChangeSpDrawerState: (state: DrawerState) => void;
   filterExpanded: boolean;
   onChangeFilterExpanded: (state: boolean) => void;
+  onChangeViewport: (viewport: Viewport) => void;
 };
 
 function MainSide(props: Props) {
   const query = useQuery();
   const history = useHistory();
-  const [, setViewport] = useViewport();
   const [filter, setFilter] = useFilter();
   const [pcDrawerOpen, setPcDrawerOpen] = useState(true);
   const [aboutSideOpen, setAboutSideOpen] = useState(false);
@@ -127,7 +128,7 @@ function MainSide(props: Props) {
             <div className={classes.sideContainer}>
               <div className={classes.searchBarContainer}>
                 <SearchBar
-                  onSearch={(viewport) => setViewport(viewport)}
+                  onSearch={(viewport) => props.onChangeViewport(viewport)}
                   onMenuButtonClick={() => setAboutSideOpen(true)}
                 />
               </div>
@@ -151,7 +152,7 @@ function MainSide(props: Props) {
         <>
           <div className={classes.searchBarContainer}>
             <SearchBar
-              onSearch={(viewport) => setViewport(viewport)}
+              onSearch={(viewport) => props.onChangeViewport(viewport)}
               onMenuButtonClick={() => setAboutSideOpen(true)}
             />
             <AboutSide

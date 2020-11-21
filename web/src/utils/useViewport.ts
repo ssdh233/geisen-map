@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useLocation, useHistory } from "react-router-dom";
 import { Viewport } from "react-leaflet";
 
@@ -31,22 +31,27 @@ function useViewport() {
   const history = useHistory();
   const location = useLocation();
 
-  const viewport = (query.v && stringToViewport(query.v)) || {
-    center: [38.5548225, 135.8920016] as [number, number],
-    zoom: 6,
-  };
+  const [viewport, setViewport] = useState<Viewport>(
+    (query.v && stringToViewport(query.v)) || {
+      center: [38.5548225, 135.8920016] as [number, number],
+      zoom: 6,
+    }
+  );
 
-  const handleViewportChange = useCallback(
-    (viewport: Viewport) => {
-      if (viewport.zoom && viewport.zoom >= 19) {
-        viewport.zoom = 19;
-      }
-
+  useEffect(() => {
+    if (location.pathname.includes("map")) {
       const newQuery = { ...query, v: viewportToString(viewport) };
       history.push(`${location.pathname}?${toQuery(newQuery)}`);
-    },
-    [query, location, history]
-  );
+    }
+  }, [location.pathname, viewport]);
+
+  const handleViewportChange = (viewport: Viewport) => {
+    if (viewport.zoom && viewport.zoom >= 19) {
+      viewport.zoom = 19;
+    }
+
+    setViewport(viewport);
+  };
 
   return [viewport, handleViewportChange] as [
     Viewport,

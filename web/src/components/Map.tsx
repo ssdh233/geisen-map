@@ -20,7 +20,6 @@ import MyMarker from "../components/MyMarker";
 import { GameCenterGeoInfo, Filter } from "../types";
 import cx from "../utils/classname";
 import useFilter from "../utils/useFilter";
-import useViewport from "../utils/useViewport";
 import { DrawerState } from "../components/MyDrawer";
 
 const { REACT_APP_API_URL } = process.env;
@@ -51,6 +50,8 @@ const useStyles = makeStyles({
 });
 
 type Props = {
+  viewport: Viewport;
+  onChangeViewport: (viewport: Viewport) => void;
   userLocation: [number, number] | null;
   requestUserLocation: (onSuccess?: () => void) => void;
   onChangeFilterExpanded: (state: boolean) => void;
@@ -63,7 +64,6 @@ function MyMap(props: Props) {
   const isSP = useMediaQuery("(max-width:768px)");
 
   const [filter] = useFilter();
-  const [viewport, setViewport] = useViewport();
 
   const [gamecenters, setGamecenters] = useState([] as GameCenterGeoInfo[]);
 
@@ -80,7 +80,7 @@ function MyMap(props: Props) {
 
   function handleHomeButtonClick() {
     if (props.userLocation) {
-      setViewport({ center: props.userLocation, zoom: 14 });
+      props.onChangeViewport({ center: props.userLocation, zoom: 14 });
     } else {
       // TODO tell user to set permission
     }
@@ -112,7 +112,7 @@ function MyMap(props: Props) {
 
   const handleViewportChanged = (viewport: any) => {
     isChanging.current = setTimeout(() => {
-      setViewport(viewport);
+      props.onChangeViewport(viewport);
       isChanging.current = undefined;
       startRequestUserLocation();
     }, 100);
@@ -156,8 +156,9 @@ function MyMap(props: Props) {
         />
       </Helmet>
       <Map
+        onClick={handleMapClick}
         className={classes.mapRoot}
-        viewport={viewport}
+        viewport={props.viewport}
         onViewportChange={handleViewportChange}
         onViewportChanged={handleViewportChanged}
         zoomControl={false}
@@ -169,7 +170,7 @@ function MyMap(props: Props) {
         {!isSP && <ZoomControl position="bottomright" />}
         {getVisibleGamecenters(
           filterGamecenters(gamecenters, filter),
-          viewport
+          props.viewport
         ).map(({ _id, geo, name }) => {
           return (
             <MyMarker
