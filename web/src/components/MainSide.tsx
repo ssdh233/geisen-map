@@ -90,7 +90,7 @@ function MainSide(props: Props) {
 
     if (state === "closed") {
       // waiting for animation
-      setTimeout(() => history.push(`/?${toQuery(query)}`), 150);
+      setTimeout(() => history.push(`/map?${toQuery(query)}`), 150);
     }
   }
 
