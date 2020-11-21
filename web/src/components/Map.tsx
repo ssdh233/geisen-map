@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet";
 import { useHistory } from "react-router-dom";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
@@ -19,7 +19,6 @@ import { toQuery } from "../utils/query";
 import MyMarker from "../components/MyMarker";
 import { GameCenterGeoInfo, Filter } from "../types";
 import cx from "../utils/classname";
-import debounce from "../utils/debounce";
 import useFilter from "../utils/useFilter";
 import useViewport from "../utils/useViewport";
 import { DrawerState } from "../components/MyDrawer";
@@ -97,14 +96,56 @@ function MyMap(props: Props) {
     history.push(`/map?${toQuery(query)}`);
   }
 
-  useEffect(() => {
-    props.requestUserLocation(() => {
-      const id = setInterval(() => props.requestUserLocation(), 3000);
-      return () => clearInterval(id);
-    });
-  }, []);
-
   const classes = useStyles();
+
+  const isChanging = useRef<NodeJS.Timeout | undefined>(undefined);
+  const requestUserLocationInterval = useRef<NodeJS.Timeout | undefined>(
+    undefined
+  );
+  const handleViewportChange = () => {
+    if (isChanging.current) {
+      clearTimeout(isChanging.current);
+      isChanging.current = undefined;
+    }
+    stopRequestUserLocation();
+  };
+
+  const handleViewportChanged = (viewport: any) => {
+    isChanging.current = setTimeout(() => {
+      setViewport(viewport);
+      isChanging.current = undefined;
+      startRequestUserLocation();
+    }, 100);
+  };
+
+  function startRequestUserLocation() {
+    stopRequestUserLocation();
+    requestUserLocationInterval.current = setInterval(() => {
+      props.requestUserLocation();
+    }, 3000);
+  }
+
+  function stopRequestUserLocation() {
+    if (requestUserLocationInterval.current) {
+      clearInterval(requestUserLocationInterval.current as any);
+      requestUserLocationInterval.current = undefined;
+    }
+  }
+
+  // changeしてない時：やる
+  // change startやめる
+  // change end 再開
+  useEffect(() => {
+    function a() {
+      if (document.visibilityState === "visible") {
+        startRequestUserLocation();
+      } else {
+        stopRequestUserLocation();
+      }
+    }
+    document.addEventListener("visibilitychange", a);
+    return () => document.removeEventListener("visibilitychange", a);
+  }, []);
 
   return (
     <div>
@@ -117,9 +158,9 @@ function MyMap(props: Props) {
       <Map
         className={classes.mapRoot}
         viewport={viewport}
-        onViewportChange={debounce(setViewport, 100)}
+        onViewportChange={handleViewportChange}
+        onViewportChanged={handleViewportChanged}
         zoomControl={false}
-        onClick={handleMapClick}
       >
         <TileLayer
           attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'

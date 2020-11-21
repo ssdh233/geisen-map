@@ -4,6 +4,7 @@ function useUserLocation() {
   const [userLocation, setUserLocation] = useState(
     null as [number, number] | null
   );
+
   function requestUserLocation(onSuccess?: () => void) {
     let startPos;
     let geoOptions = {
