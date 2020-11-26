@@ -226,7 +226,7 @@ export default class Crawler {
       );
     }
     console.log(
-      `Saved ${flatResults.length} Items, new game center: ${newGameCenterCount}`
+      `Updated ${flatResults.length} Items, new game center: ${newGameCenterCount}`
     );
 
     db.close();

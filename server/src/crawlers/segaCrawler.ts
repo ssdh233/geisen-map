@@ -1,4 +1,5 @@
 import cheerio from "cheerio";
+import parseArgs from "minimist";
 
 import Crawler from "./crawler";
 import { sleepRandom } from "../utils/sleep";
@@ -61,7 +62,9 @@ const segaCrawler = (gameId: string, gameName: string) =>
     },
   });
 
-async function start() {
+async function start(option: parseArgs.ParsedArgs) {
+  console.log({ option });
+
   let SEGA_INFO = [
     ["96", "maimai"],
     ["93", "wacca"],
@@ -70,6 +73,17 @@ async function start() {
     ["34", "diva"],
   ];
 
+  if (option.game) {
+    SEGA_INFO = SEGA_INFO.filter((x) => x[1] === option.game);
+    console.log("Running segaCrawler for", option.game);
+
+    if (SEGA_INFO.length === 0) {
+      throw new Error(`No matching game found by "${option.game}"`);
+    }
+  } else {
+    console.log("Running segaCrawler for all games");
+  }
+
   for (let i = 0; i < SEGA_INFO.length; i++) {
     const [key, name] = SEGA_INFO[i];
     console.log(`========= crawler for ${name} =========`);
@@ -77,6 +91,7 @@ async function start() {
   }
 }
 
-start().then(() => {
+const option = parseArgs(process.argv.slice(2));
+start(option).then(() => {
   process.exit(0);
 });
