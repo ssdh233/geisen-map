@@ -1,10 +1,8 @@
 import fetch from "node-fetch";
 import cheerio from "cheerio";
-import parseArgs from "minimist";
 
+import Runner from "./runner";
 import Crawler, { GameCenterWithRawAddress } from "./crawler";
-// import { getGeoFromText } from "../utils/googleMapApi";
-require("dotenv").config();
 
 const bemaniCrawler = (gameKeyword: string, gameName: string) =>
   new Crawler({
@@ -75,8 +73,7 @@ const bemaniCrawler = (gameKeyword: string, gameName: string) =>
     },
   });
 
-async function start(option: parseArgs.ParsedArgs) {
-  console.log({ option });
+new Runner("bemaniCrawler").start(async (option) => {
   let BEMANI_INFO = [
     ["IIDX", "iidx"],
     ["DDR", "ddr"],
@@ -108,7 +105,4 @@ async function start(option: parseArgs.ParsedArgs) {
     console.log(`========= crawler for ${name} =========`);
     await bemaniCrawler(keyword, name).start();
   }
-}
-
-const option = parseArgs(process.argv.slice(2));
-start(option);
+});

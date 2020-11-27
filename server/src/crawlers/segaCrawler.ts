@@ -1,10 +1,9 @@
 import cheerio from "cheerio";
-import parseArgs from "minimist";
 
+import Runner from "./runner";
 import Crawler from "./crawler";
 import { sleepRandom } from "../utils/sleep";
 import timeout from "../utils/timeout";
-require("dotenv").config();
 
 const segaCrawler = (gameId: string, gameName: string) =>
   new Crawler({
@@ -62,9 +61,7 @@ const segaCrawler = (gameId: string, gameName: string) =>
     },
   });
 
-async function start(option: parseArgs.ParsedArgs) {
-  console.log({ option });
-
+new Runner("segaCrawler").start(async (option) => {
   let SEGA_INFO = [
     ["96", "maimai"],
     ["93", "wacca"],
@@ -89,9 +86,4 @@ async function start(option: parseArgs.ParsedArgs) {
     console.log(`========= crawler for ${name} =========`);
     await segaCrawler(key, name).start();
   }
-}
-
-const option = parseArgs(process.argv.slice(2));
-start(option).then(() => {
-  process.exit(0);
 });
