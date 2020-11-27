@@ -1,0 +1,76 @@
+[
+  {
+    "name": "bemaniCrawler",
+    "option": "--game iidx"
+  },
+  {
+    "name": "bemaniCrawler",
+    "option": "--game ddr"
+  },
+  {
+    "name": "bemaniCrawler",
+    "option": "--game ddr20"
+  },
+  {
+    "name": "bemaniCrawler",
+    "option": "--game jubeat"
+  },
+  {
+    "name": "bemaniCrawler",
+    "option": "--game dan"
+  },
+  {
+    "name": "bemaniCrawler",
+    "option": "--game dm"
+  },
+  {
+    "name": "bemaniCrawler",
+    "option": "--game gf"
+  },
+  {
+    "name": "bemaniCrawler",
+    "option": "--game nostalgia"
+  },
+  {
+    "name": "bemaniCrawler",
+    "option": "--game sdvx"
+  },
+  {
+    "name": "bemaniCrawler",
+    "option": "--game rb"
+  },
+  {
+    "name": "bemaniCrawler",
+    "option": "--game museca"
+  },
+  {
+    "name": "bemaniCrawler",
+    "option": "--game danevo"
+  },
+  {
+    "name": "popnCrawler"
+  },
+  {
+    "name": "taikoCrawler"
+  },
+  {
+    "name": "segaCrawler",
+    "option": "--game maimai"
+  },
+  {
+    "name": "segaCrawler",
+    "option": "--game wacca"
+  },
+  {
+    "name": "segaCrawler",
+    "option": "--game ongeki"
+  },
+  {
+    "name": "segaCrawler",
+    "option": "--game chuni"
+  },
+  {
+    "name": "segaCrawler",
+    "option": "--game diva"
+  }
+]
