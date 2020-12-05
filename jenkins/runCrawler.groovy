@@ -19,6 +19,7 @@ pipeline {
         echo params.toString()
 
         script {
+          sh "whoami"
           sh "printenv"
         }
       }
