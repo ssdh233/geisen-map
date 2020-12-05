@@ -1,5 +1,5 @@
-properties(
-  [parameters([
+properties([
+  parameters([
     booleanParam(
       defaultValue: false,
       description: 'If true, pull the lastest cralwer from github and do yarn install to update dependencies.',
