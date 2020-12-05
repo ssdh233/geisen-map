@@ -17,6 +17,10 @@ pipeline {
     stage('Initialization') {
       steps {
         echo params.toString()
+
+        script {
+          sh "printenv"
+        }
       }
     }
     stage('[Optional] Update crawler') {
