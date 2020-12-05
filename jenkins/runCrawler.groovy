@@ -21,11 +21,6 @@ pipeline {
     stage('Initialization') {
       steps {
         echo params.toString()
-
-        script {
-          sh "whoami"
-          sh "printenv"
-        }
       }
     }
     stage('[Optional] Update crawler') {
