@@ -13,6 +13,9 @@ properties([
 pipeline {
   agent any
   tools { nodejs "node15" }
+  environment {
+    WTF_COLOR = "blue"
+  }
   stages {
     stage('Initialization') {
       steps {
