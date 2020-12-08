@@ -8,7 +8,7 @@ import timeout from "../utils/timeout";
 const segaCrawler = (gameId: string, gameName: string) =>
   new Crawler({
     sourceId: "allnet",
-    urls: Array(47) // max 47
+    urls: Array(1) // max 47
       .fill(0)
       .map((_, i) => {
         let id = "" + (i + 1);

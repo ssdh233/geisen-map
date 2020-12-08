@@ -13,6 +13,10 @@ properties([
 pipeline {
   agent any
   tools { nodejs "node15" }
+  environment {
+    MONGODB_URI = credentials("MONGODB_URI")
+    GOOGLE_MAP_API_KEY = credentials("GOOGLE_MAP_API_KEY")
+  }
   stages {
     stage('Initialization') {
       steps {
@@ -50,7 +54,7 @@ pipeline {
           script {
             def stageName = params.crawler + " " + params.option
             stage(stageName) {
-              sh "node dist/crawlers/${params.crawler}.js ${params.option} --testMode"
+              sh "node dist/crawlers/${params.crawler}.js ${params.option}"
             }
           }
         }

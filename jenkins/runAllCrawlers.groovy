@@ -13,6 +13,10 @@ def crawlers;
 pipeline {
   agent any
   tools { nodejs "node15" }
+  environment {
+    MONGODB_URI = credentials("MONGODB_URI")
+    GOOGLE_MAP_API_KEY = credentials("GOOGLE_MAP_API_KEY")
+  }
   stages {
     stage('Initialization') {
       steps {
