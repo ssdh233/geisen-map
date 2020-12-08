@@ -43,6 +43,7 @@ pipeline {
           script {
             sh "yarn --version"
             sh "yarn"
+            sh "yarn workspace imi-enrichment-address build"
             sh "yarn workspace server build"
           }
         }
