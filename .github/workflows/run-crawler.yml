@@ -11,8 +11,9 @@ on:
         required: false
         default: 'maimai'
 jobs:
-  Explore-GitHub-Actions:
+  printInputs:
     runs-on: ubuntu-latest
     steps:
       - run: |
         echo "crawler: ${{ github.event.inputs.crawler }}"
+
