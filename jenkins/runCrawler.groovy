@@ -43,6 +43,7 @@ pipeline {
           script {
             sh "yarn --version"
             sh "yarn"
+            sh "yarn workspace imi-enrichment-address build"
             sh "yarn workspace server build"
           }
         }
@@ -54,7 +55,7 @@ pipeline {
           script {
             def stageName = params.crawler + " " + params.option
             stage(stageName) {
-              sh "node dist/crawlers/${params.crawler}.js ${params.option} --testMode"
+              sh "node dist/crawlers/${params.crawler}.js ${params.option}"
             }
           }
         }
