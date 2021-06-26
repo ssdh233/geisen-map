@@ -16,4 +16,5 @@ jobs:
     steps:
     - run: |
         echo "Crawler: ${{ github.event.inputs.crawler }}"
+        echo "Game: ${{ github.event.inputs.game }}"
 
