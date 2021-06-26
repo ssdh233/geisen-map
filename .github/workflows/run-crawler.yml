@@ -14,6 +14,6 @@ jobs:
   printInputs:
     runs-on: ubuntu-latest
     steps:
-      - run: |
-        echo "crawler: ${{ github.event.inputs.crawler }}"
+    - run: |
+        echo "Crawler: ${{ github.event.inputs.crawler }}"
 
