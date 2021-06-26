@@ -1,19 +1,17 @@
 name: GitHub Actions Demo
-on:
+on: 
   workflow_dispatch:
     inputs:
-      crawler:
-        description: 'select crawler(bemani/popn/sega/taiko)'     
+      logLevel:
+        description: 'Log level'     
         required: true
-        default: 'sega'
-      game:
-        description: 'select game'     
-        required: false
-        default: 'maimai'
+        default: 'warning'
+      tags:
+        description: 'Test scenario tags'  
 jobs:
-  Explore-GitHub-Actions:
+  printInputs:
     runs-on: ubuntu-latest
     steps:
-      - run: |
-        echo "crawler: ${{ github.event.inputs.crawler }}"
-        echo "game: ${{ github.event.inputs.game }}"
+    - run: |
+        echo "Log level: ${{ github.event.inputs.logLevel }}"
+        echo "Tags: ${{ github.event.inputs.tags }}" 
