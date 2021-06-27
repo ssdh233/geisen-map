@@ -22,6 +22,8 @@ export default async function normalizeAddress(
     住所: { 都道府県: prefecture, 市区町村: city, 区: ward },
   } = result;
 
+  console.log(address, result)
+
   let addr;
   if (ward) {
     addr = address.split(ward)[1];
