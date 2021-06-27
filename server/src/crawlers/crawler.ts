@@ -7,6 +7,7 @@ import sleep from "../utils/sleep";
 import { getGeoFromText } from "../utils/googleMapApi";
 import normalizeAddress from "../utils/address";
 import GameCenterModel, { GameCenter, Info } from "../models/gameCenter";
+import { getInstance } from "../utils/address";
 
 export type GameCenterWithRawAddress = Pick<
   GameCenter,
@@ -230,6 +231,7 @@ export default class Crawler {
     );
 
     db.close();
+    getInstance().close();
   }
 }
 
