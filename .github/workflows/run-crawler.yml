@@ -17,8 +17,7 @@ jobs:
     - name: Check out repository code
       uses: actions/checkout@v2
     - run: |
-        echo "Crawler: ${{ github.event.inputs.crawler }}"
-        echo "Game: ${{ github.event.inputs.game }}"
-        ls -al
         yarn install
-        ls -al
+        cd server
+        yarn build
+        node dist/crawlers/${{ github.event.inputs.crawler }}Crawler.js --game ${{ github.event.inputs.game }}
