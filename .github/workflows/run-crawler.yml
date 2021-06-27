@@ -16,11 +16,11 @@ jobs:
     steps:
     - name: Check out repository code
       uses: actions/checkout@v2
-      env:
-        MONGODB_URI: ${{ secrets.MONGODB_URI }}
-        GOOGLE_MAP_API_KEY:  ${{ secrets.GOOGLE_MAP_API_KEY }}
     - run: |
         yarn install
         cd server
         yarn build
         node dist/crawlers/${{ github.event.inputs.crawler }}Crawler.js --game ${{ github.event.inputs.game }}
+      env:
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        GOOGLE_MAP_API_KEY:  ${{ secrets.GOOGLE_MAP_API_KEY }}
