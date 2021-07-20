@@ -1,17 +1,13 @@
-name: Run Crawler
+name: Run All Crawlers
 on:
   workflow_dispatch:
     inputs:
-      crawler:
-        description: 'select crawler(bemani/popn/sega/taiko)'     
+      confirm:
+        description: 'Are you sure?'     
         required: true
-        default: 'sega'
-      game:
-        description: 'select game'
-        required: false
-        default: 'maimai'
+        default: 'yes'
 jobs:
-  run_crawler:
+  run_all_crawlers:
     runs-on: ubuntu-latest
     env:
       MONGODB_URI: ${{ secrets.MONGODB_URI }}
@@ -23,5 +19,8 @@ jobs:
         yarn install
         cd server
         yarn build
-    - run: node server/dist/crawlers/${{ github.event.inputs.crawler }}Crawler.js --game ${{ github.event.inputs.game }}
+    - run: node server/dist/crawlers/segaCrawler.js
+    - run: node server/dist/crawlers/taikoCrawler.js
+    - run: node server/dist/crawlers/bemaniCrawler.js
+    - run: node server/dist/crawlers/popnCrawler.js
       
