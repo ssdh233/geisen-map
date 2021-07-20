@@ -4,7 +4,6 @@
   "description": "IMI 住所型正規化パッケージ",
   "main": "main.js",
   "scripts": {
-    "build": "echo 'no need to build this package'",
     "test": "mocha",
     "download": "bash tools/download.sh",
     "format": "zcat cache/isj.txt.gz | node tools/format.js cache/sac_label.json cache/sac_parent.json cache/sac_change.json",

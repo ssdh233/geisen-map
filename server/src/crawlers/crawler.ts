@@ -7,6 +7,7 @@ import sleep from "../utils/sleep";
 import { getGeoFromText } from "../utils/googleMapApi";
 import normalizeAddress from "../utils/address";
 import GameCenterModel, { GameCenter, Info } from "../models/gameCenter";
+import { getInstance } from "../utils/address";
 
 export type GameCenterWithRawAddress = Pick<
   GameCenter,
@@ -172,13 +173,13 @@ export default class Crawler {
     let newGameCenterCount = 0;
     for (let i = 0; i < flatResults.length; i++) {
       const gameCenterItem = flatResults[i];
+      console.log(`Processing item ${i}`, gameCenterItem);
 
-      // TODO change here
       let gameCenterEntity = await GameCenterModel.findSameGameCenter(
         gameCenterItem
       );
       if (!gameCenterEntity) {
-        console.log("New Game Center!", gameCenterItem);
+        console.log("New Game Center!");
         newGameCenterCount++;
         gameCenterEntity = new GameCenterModel({
           ...gameCenterItem,
@@ -226,10 +227,11 @@ export default class Crawler {
       );
     }
     console.log(
-      `Saved ${flatResults.length} Items, new game center: ${newGameCenterCount}`
+      `Updated ${flatResults.length} Items, new game center: ${newGameCenterCount}`
     );
 
     db.close();
+    getInstance().close();
   }
 }
 

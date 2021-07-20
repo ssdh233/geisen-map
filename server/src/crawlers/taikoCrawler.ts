@@ -1,7 +1,7 @@
 import vm from "vm";
 
 import Crawler from "./crawler";
-require("dotenv").config();
+import Runner from "./runner";
 
 const taikoCrawler = new Crawler({
   sourceId: "taiko_official",
@@ -12,14 +12,17 @@ const taikoCrawler = new Crawler({
       while (id.length < 2) id = "0" + id;
       return `https://taiko.namco-ch.net/taiko/location/list?area=JP-${id}`;
     }),
-  getList: $ => {
+  getList: ($) => {
     // console.log($("body > script:nth-child(2)").html());
     const scriptContent = $("body > script").html();
 
     const startIndex = scriptContent.indexOf("var locations =");
     const endIndex = scriptContent.indexOf("];", startIndex);
 
-    const locationDefinitionCode = scriptContent.substring(startIndex, endIndex + 2);
+    const locationDefinitionCode = scriptContent.substring(
+      startIndex,
+      endIndex + 2
+    );
     const sandbox: { locations: any[] } = { locations: [] };
 
     vm.createContext(sandbox);
@@ -27,13 +30,13 @@ const taikoCrawler = new Crawler({
 
     return sandbox.locations;
   },
-  getItem: raw => ({
+  getItem: (raw) => ({
     geo: { lat: raw.latitude, lng: raw.longitude },
     name: raw.name,
     rawAddress: raw.address,
     infos: [],
-    games: [{ name: "taiko", infos: [{ infoType: "main", text: "" }] }]
-  })
+    games: [{ name: "taiko", infos: [{ infoType: "main", text: "" }] }],
+  }),
 });
 
-taikoCrawler.start();
+new Runner("taikoCrawler").start(() => taikoCrawler.start());

@@ -1,16 +1,15 @@
 import fetch from "node-fetch";
 import cheerio from "cheerio";
 
+import Runner from "./runner";
 import Crawler, { GameCenterWithRawAddress } from "./crawler";
-// import { getGeoFromText } from "../utils/googleMapApi";
-require("dotenv").config();
 
 const bemaniCrawler = (gameKeyword: string, gameName: string) =>
   new Crawler({
     sourceId: "bemani_official",
 
     fetchHeaders: {
-      cookie: "facility_dspcount=50"
+      cookie: "facility_dspcount=50",
     },
     urls: Array(47) // max 47
       .fill(0)
@@ -19,8 +18,8 @@ const bemaniCrawler = (gameKeyword: string, gameName: string) =>
         while (id.length < 2) id = "0" + id;
         return `https://p.eagate.573.jp/game/facility/search/p/list.html?gkey=${gameKeyword}&paselif=false&pref=JP-${id}&finder=area`;
       }),
-    getPaginatedUrls: async url => {
-      const html = await fetch(url).then(res => res.text());
+    getPaginatedUrls: async (url) => {
+      const html = await fetch(url).then((res) => res.text());
       const $ = cheerio.load(html);
       const count = parseInt($("div.cl_search_result").text());
       console.log("gamecenter count:", count, url);
@@ -33,7 +32,7 @@ const bemaniCrawler = (gameKeyword: string, gameName: string) =>
         return [];
       }
     },
-    getList: $ => Array.from($("div.cl_shop_bloc")),
+    getList: ($) => Array.from($("div.cl_shop_bloc")),
     getItem: async (_, raw) => {
       const name = raw.attr("data-name");
       const address = raw.attr("data-address");
@@ -50,14 +49,17 @@ const bemaniCrawler = (gameKeyword: string, gameName: string) =>
           access && { infoType: "access", text: access },
           operationTime && { infoType: "businessHour", text: operationTime },
           holiday && { infoType: "closedDay", text: "定休日 " + holiday },
-          telno && { infoType: "tel", text: telno }
-        ].filter(x => x),
+          telno && { infoType: "tel", text: telno },
+        ].filter((x) => x),
         games: [
           {
             name: gameName,
-            infos: [{ infoType: "main", text: "" }, paseri && { infoType: "paseri", text: paseri }].filter(x => x)
-          }
-        ]
+            infos: [
+              { infoType: "main", text: "" },
+              paseri && { infoType: "paseri", text: paseri },
+            ].filter((x) => x),
+          },
+        ],
       };
 
       let lat = parseFloat(raw.attr("data-latitude"));
@@ -68,10 +70,10 @@ const bemaniCrawler = (gameKeyword: string, gameName: string) =>
       }
 
       return item;
-    }
+    },
   });
 
-async function start() {
+new Runner("bemaniCrawler").start(async (option) => {
   let BEMANI_INFO = [
     ["IIDX", "iidx"],
     ["DDR", "ddr"],
@@ -84,12 +86,23 @@ async function start() {
     ["SDVX", "sdvx"],
     ["REFLECC", "rb"],
     ["MUSECA", "museca"],
-    ["DANEVOAC", "danevo"]
+    ["DANEVOAC", "danevo"],
   ];
+
+  if (option.game) {
+    BEMANI_INFO = BEMANI_INFO.filter((x) => x[1] === option.game);
+    console.log("Running bemaniCrawler for", option.game);
+
+    if (BEMANI_INFO.length === 0) {
+      throw new Error(`No matching game found by "${option.game}"`);
+    }
+  } else {
+    console.log("Running bemaniCrawler for all games");
+  }
 
   for (let i = 0; i < BEMANI_INFO.length; i++) {
     const [keyword, name] = BEMANI_INFO[i];
+    console.log(`========= crawler for ${name} =========`);
     await bemaniCrawler(keyword, name).start();
   }
-}
-start();
+});

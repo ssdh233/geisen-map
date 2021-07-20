@@ -1,5 +1,11 @@
 import { NormalizedAddress } from "../models/gameCenter";
-import imi from "imi-enrichment-address";
+import EnrichmentAddress from "imi-enrichment-address";
+
+const imi = new EnrichmentAddress();
+
+export function getInstance() {
+  return imi;
+}
 
 function toHalfWidth(str: string) {
   return str
@@ -16,11 +22,13 @@ export default async function normalizeAddress(
   let address = rawAddress.replace(/\s|　/g, "");
   address = toHalfWidth(address);
 
-  const result = await imi(address);
+  const result = await imi.convert(address);
 
   const {
     住所: { 都道府県: prefecture, 市区町村: city, 区: ward },
   } = result;
+
+  console.log(address, result);
 
   let addr;
   if (ward) {

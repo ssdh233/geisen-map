@@ -3,7 +3,7 @@ import stringSimilarity from "string-similarity";
 import normalizeGameCenterName from "../utils/gameCenterName";
 
 export type Info = {
-  infoType: string; // Enum?
+  infoType: string; // Enum? ['main', 'access', 'businessHour", "cloasedDay", "tel", "paseri", "cabType"]
   text: string;
   sourceId?: string;
   url?: string;

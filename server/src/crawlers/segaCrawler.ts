@@ -1,9 +1,9 @@
 import cheerio from "cheerio";
 
+import Runner from "./runner";
 import Crawler from "./crawler";
 import { sleepRandom } from "../utils/sleep";
 import timeout from "../utils/timeout";
-require("dotenv").config();
 
 const segaCrawler = (gameId: string, gameName: string) =>
   new Crawler({
@@ -61,7 +61,7 @@ const segaCrawler = (gameId: string, gameName: string) =>
     },
   });
 
-async function start() {
+new Runner("segaCrawler").start(async (option) => {
   let SEGA_INFO = [
     ["96", "maimai"],
     ["93", "wacca"],
@@ -70,13 +70,20 @@ async function start() {
     ["34", "diva"],
   ];
 
+  if (option.game) {
+    SEGA_INFO = SEGA_INFO.filter((x) => x[1] === option.game);
+    console.log("Running segaCrawler for", option.game);
+
+    if (SEGA_INFO.length === 0) {
+      throw new Error(`No matching game found by "${option.game}"`);
+    }
+  } else {
+    console.log("Running segaCrawler for all games");
+  }
+
   for (let i = 0; i < SEGA_INFO.length; i++) {
     const [key, name] = SEGA_INFO[i];
     console.log(`========= crawler for ${name} =========`);
     await segaCrawler(key, name).start();
   }
-}
-
-start().then(() => {
-  process.exit(0);
 });
