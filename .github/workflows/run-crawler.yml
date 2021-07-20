@@ -1,0 +1,26 @@
+name: Run Crawler
+on:
+  workflow_dispatch:
+    inputs:
+      crawler:
+        description: 'select crawler(bemani/popn/sega/taiko)'     
+        required: true
+        default: 'sega'
+      game:
+        description: 'select game'     
+        required: false
+        default: 'maimai'
+jobs:
+  printInputs:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v2
+    - run: |
+        yarn install
+        cd server
+        yarn build
+        node dist/crawlers/${{ github.event.inputs.crawler }}Crawler.js --game ${{ github.event.inputs.game }}
+      env:
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        GOOGLE_MAP_API_KEY:  ${{ secrets.GOOGLE_MAP_API_KEY }}
