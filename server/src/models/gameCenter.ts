@@ -51,12 +51,13 @@ const GameCenterSchema = new mongoose.Schema({
   geo: { lat: Number, lng: Number },
   name: String,
   address: {
-    regionId: String,
     fullAddress: String,
-    build: String,
-    number: String,
-    region: String,
+    prefecture: String,
+    city: String,
+    ward: String,
     town: String,
+    number: String,
+    build: String,
   },
   infos: [Info],
   games: [
@@ -131,19 +132,26 @@ function isSameGameCenter(
   );
   // console.log({ nameSimilarity });
 
-  // console.log(gameCenterA.address.fullAddress, gameCenterB.address.fullAddress);
-  // const addressSimilarity = stringSimilarity.compareTwoStrings(
-  //   gameCenterA.address.region +
+  // console.log(
+  //   gameCenterA.address.ward +
   //     gameCenterA.address.town +
   //     gameCenterA.address.number,
-  //   gameCenterB.address.region +
+  //   gameCenterB.address.ward +
   //     gameCenterB.address.town +
   //     gameCenterB.address.number
   // );
   const addressSimilarity = stringSimilarity.compareTwoStrings(
-    gameCenterA.address.fullAddress,
-    gameCenterB.address.fullAddress
+    gameCenterA.address.ward +
+      gameCenterA.address.town +
+      gameCenterA.address.number,
+    gameCenterB.address.ward +
+      gameCenterB.address.town +
+      gameCenterB.address.number
   );
+  // const addressSimilarity = stringSimilarity.compareTwoStrings(
+  //   gameCenterA.address.fullAddress,
+  //   gameCenterB.address.fullAddress
+  // );
 
   // console.log({ addressSimilarity });
 
