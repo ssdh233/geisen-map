@@ -94,8 +94,6 @@ const popnCrawler = new Crawler({
         ],
       };
 
-      console.log("getting info:", name);
-
       return result;
     } catch (error) {
       console.error(raw.html());
