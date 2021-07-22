@@ -173,7 +173,6 @@ export default class Crawler {
     let newGameCenterCount = 0;
     for (let i = 0; i < flatResults.length; i++) {
       const gameCenterItem = flatResults[i];
-      console.log(`Processing item ${i}`, gameCenterItem);
 
       let gameCenterEntity = await GameCenterModel.findSameGameCenter(
         gameCenterItem
