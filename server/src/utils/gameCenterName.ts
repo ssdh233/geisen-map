@@ -36,7 +36,6 @@ export function stripCommonSubstring(strA: string, strB: string) {
   let result = strA;
   let commonSubstring = longestCommonSubstring(result, strB);
   while (commonSubstring.length > 1) {
-    console.log({ result, commonSubstring });
     result = result.replace(commonSubstring, "");
     commonSubstring = longestCommonSubstring(result, strB);
   }

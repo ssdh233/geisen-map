@@ -179,7 +179,6 @@ export default class Crawler {
         gameCenterItem
       );
       if (!gameCenterEntity) {
-        console.log("New Game Center!");
         newGameCenterCount++;
         gameCenterEntity = new GameCenterModel({
           ...gameCenterItem,
