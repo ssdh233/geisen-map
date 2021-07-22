@@ -4,16 +4,20 @@ const bangou = require("./lib/bangou");
 
 const util = require("./lib/util");
 
-const levelup = require("levelup");
-const leveldown = require("leveldown");
-
 class EnrichmentAddress {
   constructor() {
-    this.db = levelup(leveldown(__dirname + "/db"));
-  }
+    this.ldb_json = JSON.parse(fs.readFileSync(__dirname + "/ldb.json"));
 
-  close() {
-    this.db.close();
+    this.db = {
+      get: async (key) => {
+        const value = this.ldb_json[key];
+        if (value) {
+          return value;
+        } else {
+          throw new Error("wtf");
+        }
+      },
+    };
   }
 
   // 住所から緯度経度付き場所型を返す
@@ -82,7 +86,7 @@ class EnrichmentAddress {
           asBuffer: false,
         })
         .then((str) => {
-          let json = JSON.parse(str);
+          let json = str;
 
           if (code.length === 5) {
             const match = json["@graph"].filter((x) => {
