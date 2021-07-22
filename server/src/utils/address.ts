@@ -3,10 +3,6 @@ import EnrichmentAddress from "imi-enrichment-address";
 
 const imi = new EnrichmentAddress();
 
-export function getInstance() {
-  return imi;
-}
-
 function toHalfWidth(str: string) {
   return str
     .replace(/[Ａ-Ｚａ-ｚ０-９]/g, function (s) {
