@@ -112,6 +112,14 @@ GameCenterSchema.statics.findSameGameCenter = async function (
   return null;
 };
 
+function getShortAddress(gameCenter: GameCenter) {
+  return (
+    gameCenter.address.ward +
+      gameCenter.address.town +
+      gameCenter.address.number || ""
+  );
+}
+
 function isSameGameCenter(
   gameCenterA: GameCenter,
   gameCenterB: GameCenter
@@ -133,20 +141,13 @@ function isSameGameCenter(
   // console.log({ nameSimilarity });
 
   // console.log(
-  //   gameCenterA.address.ward +
-  //     gameCenterA.address.town +
-  //     gameCenterA.address.number,
-  //   gameCenterB.address.ward +
-  //     gameCenterB.address.town +
-  //     gameCenterB.address.number
+  //    getShortAddress(gameCenterA),
+  //    getShortAddress(gameCenterB)
   // );
+
   const addressSimilarity = stringSimilarity.compareTwoStrings(
-    gameCenterA.address.ward +
-      gameCenterA.address.town +
-      gameCenterA.address.number,
-    gameCenterB.address.ward +
-      gameCenterB.address.town +
-      gameCenterB.address.number
+    getShortAddress(gameCenterA),
+    getShortAddress(gameCenterB)
   );
   // const addressSimilarity = stringSimilarity.compareTwoStrings(
   //   gameCenterA.address.fullAddress,
