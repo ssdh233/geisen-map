@@ -89,7 +89,7 @@ new Runner("bemaniCrawler").start(async (option) => {
     ["DANEVOAC", "danevo"],
   ];
 
-  if (option.game) {
+  if (option.game && option.game !== "all") {
     BEMANI_INFO = BEMANI_INFO.filter((x) => x[1] === option.game);
     console.log("Running bemaniCrawler for", option.game);
 

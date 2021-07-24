@@ -71,7 +71,7 @@ new Runner("segaCrawler").start(async (option) => {
     ["34", "diva"],
   ];
 
-  if (option.game) {
+  if (option.game && option.game !== "all") {
     SEGA_INFO = SEGA_INFO.filter((x) => x[1] === option.game);
     console.log("Running segaCrawler for", option.game);
 
