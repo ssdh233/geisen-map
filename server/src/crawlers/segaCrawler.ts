@@ -21,13 +21,17 @@ const segaCrawler = (gameId: string, gameName: string) =>
       const onclickScript = raw.find(".bt_details").attr("onclick");
       let [, tenpoUrl] = onclickScript.match(/location\.href='(.*?)';/);
       tenpoUrl = "https://location.am-all.net/alm/" + tenpoUrl;
-      await sleepRandom(1000);
       let html;
-      try {
-        html = await timeout(10000, Crawler.fetchPage(tenpoUrl));
-      } catch (error) {
-        console.log(error);
-        return null;
+      let retry = 0;
+      while (!html) {
+        try {
+          await sleepRandom(1000);
+          if (retry) console.log(`(${retry}) retrying to fetch`, tenpoUrl);
+          html = await timeout(10000, Crawler.fetchPage(tenpoUrl));
+          retry++;
+        } catch (error) {
+          console.log(error);
+        }
       }
       const $ = cheerio.load(html);
       const name = $("h3").text();
