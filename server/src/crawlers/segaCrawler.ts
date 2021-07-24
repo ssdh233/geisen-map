@@ -25,10 +25,10 @@ const segaCrawler = (gameId: string, gameName: string) =>
       let retry = 0;
       while (!html) {
         try {
-          await sleepRandom(1000);
+          await sleepRandom(10000 * retry);
           if (retry) console.log(`(${retry}) retrying to fetch`, tenpoUrl);
-          html = await timeout(10000, Crawler.fetchPage(tenpoUrl));
           retry++;
+          html = await timeout(1, Crawler.fetchPage(tenpoUrl));
         } catch (error) {
           console.log(error);
         }
