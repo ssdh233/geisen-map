@@ -7,6 +7,7 @@ import timeout from "../utils/timeout";
 
 const segaCrawler = (gameId: string, gameName: string) =>
   new Crawler({
+    runOnParallel: false,
     sourceId: "allnet",
     urls: Array(47) // max 47
       .fill(0)
@@ -20,7 +21,7 @@ const segaCrawler = (gameId: string, gameName: string) =>
       const onclickScript = raw.find(".bt_details").attr("onclick");
       let [, tenpoUrl] = onclickScript.match(/location\.href='(.*?)';/);
       tenpoUrl = "https://location.am-all.net/alm/" + tenpoUrl;
-      await sleepRandom(20000);
+      await sleepRandom(1000);
       let html;
       try {
         html = await timeout(10000, Crawler.fetchPage(tenpoUrl));

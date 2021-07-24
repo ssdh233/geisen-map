@@ -27,6 +27,7 @@ export default class Crawler {
   urls: string[];
   crawlerCount: number;
   googleMapApiCount: number;
+  runOnParallel: boolean;
   fetchHeaders: any;
 
   getPaginatedUrls: (url: string) => string[] | Promise<string[]>;
@@ -43,6 +44,7 @@ export default class Crawler {
     getPaginatedUrls = (url) => [url],
     getList,
     getItem,
+    runOnParallel = true,
     fetchHeaders = {},
   }: {
     sourceId: string;
@@ -54,6 +56,7 @@ export default class Crawler {
       item: any,
       cheerioSelector: Cheerio
     ) => GameCenterWithRawAddress | Promise<GameCenterWithRawAddress>;
+    runOnParallel?: boolean;
     fetchHeaders?: any;
   }) {
     this.sourceId = sourceId;
@@ -62,6 +65,7 @@ export default class Crawler {
     this.getPaginatedUrls = getPaginatedUrls;
     this.getList = getList;
     this.getItem = getItem;
+    this.runOnParallel = runOnParallel;
     this.fetchHeaders = fetchHeaders;
     this.crawlerCount = 0;
     this.googleMapApiCount = 0;
@@ -97,28 +101,39 @@ export default class Crawler {
     const html = await Crawler.fetchPage(url, this.fetchHeaders);
 
     const $ = cheerio.load(html);
-    const items: (GameCenter | null)[] = await Promise.all(
-      this.getList($).map(async (item) => {
-        const rawItem = await this.getItem(item, $(item));
-        if (!rawItem) return null;
 
-        const address = await normalizeAddress(rawItem.rawAddress);
+    const that = this;
+    async function crawlItem(item: any) {
+      const rawItem = await that.getItem(item, $(item));
+      if (!rawItem) return null;
 
-        if (!address) return null;
+      const address = await normalizeAddress(rawItem.rawAddress);
 
-        if (rawItem.geo) {
-          return { ...rawItem, geo: rawItem.geo, address };
-        } else {
-          // if there is no geo information
-          // const addressTextWithoutBuilding =
-          //   address.region + address.town + address.number;
-          const addressTextWithoutBuilding = address.fullAddress;
-          this.googleMapApiCount++;
-          const geo = await getGeoFromText(addressTextWithoutBuilding);
-          if (geo && geo.lat && geo.lng) return { ...rawItem, geo, address };
-        }
-      })
-    );
+      if (!address) return null;
+
+      if (rawItem.geo) {
+        return { ...rawItem, geo: rawItem.geo, address };
+      } else {
+        // if there is no geo information
+        // const addressTextWithoutBuilding =
+        //   address.region + address.town + address.number;
+        const addressTextWithoutBuilding = address.fullAddress;
+        that.googleMapApiCount++;
+        const geo = await getGeoFromText(addressTextWithoutBuilding);
+        if (geo && geo.lat && geo.lng) return { ...rawItem, geo, address };
+      }
+    }
+
+    let items: (GameCenter | null)[];
+    if (this.runOnParallel) {
+      items = await Promise.all(this.getList($).map(crawlItem));
+    } else {
+      items = [];
+      const list = this.getList($);
+      for (let i = 0; i < list.length; i++) {
+        items.push(await crawlItem(list[i]));
+      }
+    }
 
     // Add crawler info
     const results = items
@@ -144,7 +159,6 @@ export default class Crawler {
   }
 
   async start() {
-
     const that = this;
     const paginatedUrls = await Promise.all(
       this.urls.map(this.getPaginatedUrls)
@@ -153,7 +167,7 @@ export default class Crawler {
 
     this.urls.forEach((url) => console.log("target url:", url));
 
-    console.log("========= Starting crawling in parallel =========");
+    console.log(`========= Starting crawling ${this.runOnParallel ? "in parallel " : "" }=========`);
 
     const promises = [];
     for (let i = 0; i < this.urls.length; i++) {
