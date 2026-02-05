@@ -18,7 +18,7 @@
     "imi-enrichment-address": "2.0.0",
     "jsonwebtoken": "^8.5.1",
     "minimist": "^1.2.5",
-    "mongoose": "^5.6.7",
+    "mongoose": "^6.13.6",
     "node-fetch": "^2.6.0",
     "oauth": "^0.9.15",
     "string-similarity": "^3.0.0"
